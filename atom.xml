@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://itachijames.github.io/</id>
     <title>Parsifal Blog</title>
-    <updated>2019-06-16T07:40:09.629Z</updated>
+    <updated>2019-06-16T07:56:07.608Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://itachijames.github.io/"/>
     <link rel="self" href="https://itachijames.github.io//atom.xml"/>
@@ -11,12 +11,36 @@
     <icon>https://itachijames.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Parsifal Blog</rights>
     <entry>
-        <title type="html"><![CDATA[test]]></title>
-        <id>https://itachijames.github.io//post/test</id>
-        <link href="https://itachijames.github.io//post/test">
+        <title type="html"><![CDATA[个人常用软件下载]]></title>
+        <id>https://itachijames.github.io//post/chang-yong-ruan-jian-xia-zai</id>
+        <link href="https://itachijames.github.io//post/chang-yong-ruan-jian-xia-zai">
         </link>
-        <updated>2019-06-16T07:29:31.000Z</updated>
-        <content type="html"><![CDATA[<p>fafa</p>
+        <updated>2016-01-01T07:41:33.000Z</updated>
+        <content type="html"><![CDATA[<p>个人所用软件做个汇总下载地址，方便不时之需</p>
+<p><a href="https://github.com/iCHAIT/awesome-macOS">Mac优秀软件</a>
+<a href="https://github.com/zhaoolee/ChromeAppHeroes">Chrome实用插件</a></p>
+<h2 id="7-zip">7-Zip</h2>
+<p><a href="http://www.7-zip.org/download.html">官网</a>  <a href="http://sparanoid.com/lab/7z/download.html">中文主页</a></p>
+<h2 id="chrome">Chrome</h2>
+<p><a href="http://www.google.cn/chrome/browser/desktop/index.html">官网</a></p>
+<h2 id="ccleaner">CCleaner</h2>
+<p><a href="http://www.piriform.com/ccleaner/download">官网</a></p>
+<h2 id="foobar2000">foobar2000</h2>
+<p><a href="http://www.foobar2000.org/">官网</a>  <a href="http://blog.sina.com.cn/go2spa">汉化版</a></p>
+<h2 id="射手影音">射手影音</h2>
+<p><a href="http://www.splayer.org/">官网</a></p>
+<h2 id="adobe-reader">Adobe Reader</h2>
+<p><a href="https://get.adobe.com/cn/reader/">官网</a></p>
+<h2 id="notepad">Notepad++</h2>
+<p><a href="https://notepad-plus-plus.org/">官网</a></p>
+<h2 id="atom">Atom</h2>
+<p><a href="https://atom.io/">官网</a></p>
+<h2 id="cajviewer">CAJViewer</h2>
+<p><a href="http://cajviewer.cnki.net/download.html">官网</a></p>
+<h2 id="teamviewer">TeamViewer</h2>
+<p><a href="http://www.teamviewer.com">官网</a></p>
+<h2 id="splashtop">Splashtop</h2>
+<p><a href="http://www.splashtop.com/downloads">官网</a></p>
 ]]></content>
     </entry>
 </feed>
