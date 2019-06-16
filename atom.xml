@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://itachijames.github.io/</id>
     <title>Parsifal Blog</title>
-    <updated>2019-06-16T08:44:45.987Z</updated>
+    <updated>2019-06-16T08:58:53.494Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://itachijames.github.io/"/>
     <link rel="self" href="https://itachijames.github.io//atom.xml"/>
@@ -10,6 +10,20 @@
     <logo>https://itachijames.github.io//images/avatar.png</logo>
     <icon>https://itachijames.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Parsifal Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Access数据库引擎安装问题]]></title>
+        <id>https://itachijames.github.io//post/AccessDBEngineIssue</id>
+        <link href="https://itachijames.github.io//post/AccessDBEngineIssue">
+        </link>
+        <updated>2016-07-14T03:15:29.000Z</updated>
+        <content type="html"><![CDATA[<p>在进行开发时，当使用Access数据库时进行数据库查询或从Excel导入数据时，会报错————未在本地计算机上注册“Microsoft.ACE.OLEDB.12.0”提供程序，这是由于计算机中没有Access数据库引擎导致。这是只需要在微软官网下载Access数据库引擎就行。下载地址：<a href="https://www.microsoft.com/zh-cn/download/details.aspx?id=13255">2010版</a></p>
+<p>但是安装的时候可能会出现问题：你从微软的主页下载，会发现有两个版本，一个是位32位系统准备的，另一个是为64位系统准备的。如果是64位系统，而且项目用到的dll都是64位的，所以要装Microsoft Access Engine-x64，而Win7系统中安装的一般都是32位的Office（32位的Office兼容性更强，稳定性更好），安装的时候就会检测到你机器上安装的是32位的Office,要求你把Office升级到64位，难道要卸载并重装Office？</p>
+<ul>
+<li>打开“运行”然后cmd，输入安装程序的位置并加上“/passive”，如:<code>C:\directory path\AccessDatabaseEngine_x64.exe /passive</code></li>
+<li>安装完成后，“运行”然后regedit，打开:<code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\Common\FilesPaths</code>，删除mso.dll即可。</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[正则表达式]]></title>
         <id>https://itachijames.github.io//post/RegularExpression</id>
@@ -188,6 +202,69 @@
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[C#垃圾回收]]></title>
+        <id>https://itachijames.github.io//post/CSharpGC</id>
+        <link href="https://itachijames.github.io//post/CSharpGC">
+        </link>
+        <updated>2016-06-22T01:35:07.000Z</updated>
+        <content type="html"><![CDATA[<p><code>C#</code>和<code>Java</code>一样是一款自带了垃圾回收功能的语言，在编程时不需时刻考虑对已分配对象的内存进行回收，而如<code>C++</code>这样没有垃圾回收功能的语言则需考虑对象是否已不可调用，要用<code>delete</code>关键字回收其内存。来讲讲C#中内存回收的一些要点。</p>
+<h2 id="前提">前提</h2>
+<p>讲垃圾回收前需要明白的是<strong>对象</strong>与<strong>引用</strong>之间的关系。我们在定义一个类（当然不是抽象类）之后，C#用<code>new</code>关键字来分配任意数量的对象，注意：<code>new</code>关键字返回的是一个“<strong>堆</strong>”上的引用，而不是真正<strong>对象本身</strong>，这个引用保存在<strong>栈</strong>内。垃圾回收是清除堆上的空间（包括压缩空的内存块）。在面向对象程序中需要用到很多对象，在C#中还分为<strong>值类型</strong>和<strong>引用类型</strong>，这些对象往往在一个函数中，而当程序调用完此函数且不再调用此函数时，函数里调用时分配的对象便不再有意义，而它又占用部分内存空间，此时就需要对其占用的空间进行回收，被称为垃圾回收（当然垃圾回收并不局限于函数调用里对象占用的空间，还包括其他很多情况所占用的空间）。</p>
+<h2 id="generation">generation</h2>
+<p>C#用<strong>generation</strong>（代）对对象进行分类（其实可以理解为一种标识），在.NET4.0后对象一般可分为3代（0代，1代，2代），将0代和1代合称为ephemeral generation（暂时代）。</p>
+<ul>
+<li>0代：从未被标记且将要回收的（新分配的）对象</li>
+<li>1代：上一次回收中没有被回收的对象</li>
+<li>2代：在上一次及以上的垃圾回收后仍未被回收的对象</li>
+</ul>
+<p>垃圾回收器回收时首先检查所有第0代对象，标志这些对象且清理后若得到足够的空闲内存，任何没有被回收的对象则被升至1代；若仍需更多内存，则检查1代对象的“可访问性”并进行回收，没有被回收的1代对象则被升至2代。（这其中还涉及到一个应用程序根“application root”的概念，就不深入研究了）</p>
+<p>.NET4.0之前进行垃圾回收时，对于暂时代的回收，会暂时挂起当前进程中所有活动线程，以确保垃圾回收中不会访问堆，通俗地将就是垃圾回收时会暂停程序以进行垃圾回收；通过专门的线程清理不在暂时代的对象，此时允许程序继续分配堆上的对象。</p>
+<p>.NET4.0后，对于暂时代上的对象，将使用一个<strong>专用后台线程</strong>进行回收，非暂时代的对象使用<strong>后台垃圾回收</strong>。这种改进无疑将提升程序的性能，但需要指出的是垃圾回收本来就可以在无任何人工干预（编程实现）下执行其工作，这种改进对编程人员不是透明的，也无需更多了解。</p>
+<h2 id="systemgc">System.GC</h2>
+<p>垃圾回收无需人为进行干预，但某些情况下可能会需要手动编程以使用垃圾回收：程序即将运行的代码不希望被垃圾回收中断；程序突然分配了很多对象，希望尽可能多的删除已获得的内存。垃圾回收的相关类主要是在mscorlib.dll中的System.GC类。此类中的函数较少，功能也很明确，就不详细说明，值得注意的有以下几点</p>
+<ol>
+<li>
+<p>手动强制垃圾回收（调用<code>Collect()</code>函数）时，应随后调用<code>GC.WaitForPendingFinalizers()</code>函数</p>
+</li>
+<li>
+<p>垃圾回收是回收<strong>托管堆</strong>上的对象，当程序没有使用非托管资源时（如PInvoke服务或COM交互），不需（应该避免）在类中提供<code>Finalize()</code>方法</p>
+</li>
+<li>
+<p>当程序使用了非托管资源，要释放这些资源，在程序中直接重写<code>Finalize()</code>方法将导致编译出错，而应该通过类的<strong>析构函数</strong>（称为终结器）来实现，并且在其中<strong>只</strong>能做清理非托管资源的工作，而不操作其他任何托管对象</p>
+</li>
+<li>
+<p>如果希望立即清除非托管资源，可在类的定义中实现<code>IDisposable</code>接口，在方法<code>Dispose()</code>中既可清理非托管资源，还能处理类中其他对象，在对象离开作用域前<strong>手动</strong>调用<code>Dispose()</code>方法（值得注意的是，并非是垃圾回收器调用<code>Dispose()</code>，用户在手动调用此方法时，对象仍在托管堆上，并可访问所有其他分配在堆上的对象）。为了保证<code>Dispose()</code>的调用，应将其放入一个<code>try/finally</code>逻辑中，若嫌麻烦，可用<code>using</code>关键字，它保证了在退出using块后，“使用”的对象将自动调用<code>Dispose()</code>方法。</p>
+</li>
+<li>
+<p>综合3、4，可在类中既实现<code>Finalize()</code>（通过析构函数），又实现<code>Dispose()</code>（实现<code>IDisposable</code>接口）。用户在类中如此定义时，若用户记得调用<code>Dispose()</code>，则可调用<code>GC.SuppressFinalize()</code>以通知回收器跳过此对象。在类中使用此种方式实现两个方法可能会有部分代码重叠，微软提供了一个官方模板提供参考</p>
+</li>
+</ol>
+<pre><code>class Example : IDisposable
+{
+    private bool disposed = false;
+    public void Dispose()
+    {
+        cleanUp(true);    //true表示用户触发的清理过程
+        GC.SuppressFinalize(this);
+    }
+    private void cleanUp(bool disposing)    //自定义的私有辅助方法
+    {
+        if(!this.disposed)
+        {
+            //释放托管资源
+            //清理非托管资源
+        }
+        disposed = true;    //保证多次调用Dispose()而不出错
+    }
+    ~Example()
+    {
+        cleanUp(false);   //false表示GC出发的清理过程
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[RSS服务使用感受、比较]]></title>
         <id>https://itachijames.github.io//post/RssServiceCompare</id>
         <link href="https://itachijames.github.io//post/RssServiceCompare">
@@ -215,6 +292,56 @@
 <p>这两个是第三方的新闻聚合应用，可以在其中自由订阅想看的新闻，可以说是种间接的RSS。一开始使用的是Flipboard，因为当时是用的三星，而三星直接将其整合到Touchwiz中，使用了一段时间发现其中的新闻源和我口味似乎没有那么贴切，再后来又发现这货竟然是中国特版的，就弃用了——最讨厌被差别对待了好吗！印象笔记也是这么弃用的。后来用了ZAKER，毕竟是国内公司做的，里面的新闻要更合我意。经常在Wifi下打开新闻，断网后看缓存，导致应用经常占据几百兆的空间，不过这并不是什么大问题。后来发现这样看新闻还是浪费时间，推荐的新闻就在首页，没有强烈的意思要去看但还是点了进去；再加上应用时不时的广告也就弃用了，坚定的转移到RSS阵营。</p>
 <p>除了这些外还试用一些其他服务，体验了一些iOS客户端和第三方客户端，如BazQux、Unread、feeder.co（付费）、Feeddler RSS Reader、Feed Wrangler（付费）、Newsify、Feedoo等，没有使用有很多的因素。通过对比发现国内国外的服务，发现还是有很大的差异：国外的专注做RSS服务，网站的中心就是用户订阅列表，提供大量设置选项；而国内服务则侧重资讯的整合，RSS相关的设置、功能不够丰富。</p>
 <p>总结来说本人认为现在最好的订阅服务是Inoreader，其客户端也还不错，推荐使用；此外NewsBlur和一览都是不错的选择。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C#关键字之static]]></title>
+        <id>https://itachijames.github.io//post/CSharpKeywordStatic</id>
+        <link href="https://itachijames.github.io//post/CSharpKeywordStatic">
+        </link>
+        <updated>2016-04-18T13:27:29.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="keyword-static">Keyword: static</h2>
+<p>对于一个普通的类，若要访问其中的某个方法/属性一般要先为此类生成一个对象，再通过此对象访问方法/属性。为避免这一“麻烦”，可见此方法用<code>static</code>关键字进行修饰，声明成一个<strong>静态成员</strong>。</p>
+<h3 id="静态数据">静态数据</h3>
+<p>对于普通类中的字段数据，类的每一个对象都会生成/维护各自字段数据的独立副本。而若将一个字段定义为静态，则此类型生成的所有对象将共享内存：若某个对象通过某种方式改变了此静态字段的值，那其他所有对象都将受到影响。</p>
+<blockquote>
+<p>静态数据字段由所有对象共享</p>
+</blockquote>
+<p>类中的静态成员（方法）在其实现中引用类中非静态成员将导致编译错误（因为类型的每个对象实例都有独立的非静态成员，你在大家公有的方法中又怎能确保调用的是你自己的非静态成员呢？）。类似的，在静态成员中将<code>this</code>操作符用作指示对象的“this”也将报错。</p>
+<h3 id="静态构造函数">静态构造函数</h3>
+<p>根据静态数据的特性可知，如果在类的构造函数中对静态数据成员进行初始化工作，那每创建一个新对象时，静态数据的值都将重置，之前所做的更改都将无效。一般设置静态字段是在声明时赋初值，而如果某静态数据的值是在运行时才获取（比如从其他文件中读取某一数据）的，那将如何实现呢？此时应该使用<strong>静态构造函数</strong>，在其中设置静态数据值。
+关于静态构造函数有几点性质：</p>
+<ol>
+<li>一个类只能定义一个静态构造函数（也即静态构造函数不能被重载）</li>
+<li>静态构造函数不允许访问修饰符且不接受任何参数</li>
+<li>静态构造函数永远只执行一次</li>
+<li>（运行库）创建类的实例或首次访问静态成员前调用静态构造函数</li>
+<li>静态构造函数的执行优先于任何实例级别的构造函数</li>
+</ol>
+<h3 id="静态类">静态类</h3>
+<p>若用<code>static</code>关键字修饰一个类，则其被声明为<strong>静态类</strong>，其将不能通过<code>new</code>关键字来创建对象实例。一般想要设计一个“工具类”时才会将一个类声明为静态类————我们使用这个类只是为了使用其中的方法/属性，而不需要创建一个具体的对象。
+.NET平台下的<code>system</code>命名空间中常用的静态类（工具类）有：</p>
+<ul>
+<li><code>Math</code> 数学计算相关函数</li>
+<li><code>GC</code> 垃圾回收</li>
+<li><code>Console</code> 控制台应用</li>
+<li><code>Enviroment</code> 系统环境及平台信息</li>
+<li><code>Convert</code> 类型转换</li>
+<li><code>Buffer</code> 基元类型数组</li>
+<li><code>BitConverter</code> 数据与字节数组转换</li>
+<li><code>Nullable</code> 返回值可为null的值类型</li>
+</ul>
+<p>与<code>static</code>关键字相关的还有<code>const</code>关键字和<code>readonly</code>关键字</p>
+<h2 id="keyword-const">Keyword: const</h2>
+<p>用 <code>const</code> 关键字修饰的数据为<strong>常量数据</strong>，其值在赋初值后永远不变。在类中的常量字段是<strong>隐式静态</strong>的，访问时需加上完全类名前缀。</p>
+<blockquote>
+<p>常量数据必须在编译时确定其值</p>
+</blockquote>
+<p>在定义常量数据时必须对其赋初值，其他任何地方，包括构造函数，都不能对之进行写操作（构造函数在运行时才调用）。</p>
+<h2 id="keyword-readonly">Keyword: readonly</h2>
+<p>与常量数据相似的，用<code>readonly</code>关键字修饰的数据称为<strong>只读数据/字段</strong>，其在定义赋初值后同样不能被修改。但与常量数据不同，其值可在运行时确定，故其可在构造函数内赋初值（当然，其他地方依然不行）。只读字段<strong>不是</strong>隐式静态的。</p>
+<h3 id="静态只读字段">静态只读字段</h3>
+<p>要将只读字段变为静态只需用<code>static</code>修饰，将其变为<strong>静态只读字段</strong>。静态只读字段将在类级别公开只读字段。在编译时已知静态只读字段，则其使用方式和常量字段相同；如其在运行时才能确定其值，则要用静态构造函数。</p>
 ]]></content>
     </entry>
     <entry>

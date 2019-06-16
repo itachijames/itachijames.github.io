@@ -5,7 +5,7 @@
     
 <meta charset="utf-8" >
 
-<title>Causerie | Parsifal Blog</title>
+<title>Access数据库引擎安装问题 | Parsifal Blog</title>
 <meta name="description" content="曾经沧海难为水">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -72,48 +72,46 @@
 
 
       <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Access数据库引擎安装问题</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2016-07-14</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://itachijames.github.io//tag/nYk7g7sa1">
+                    Issue
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>在进行开发时，当使用Access数据库时进行数据库查询或从Excel导入数据时，会报错————未在本地计算机上注册“Microsoft.ACE.OLEDB.12.0”提供程序，这是由于计算机中没有Access数据库引擎导致。这是只需要在微软官网下载Access数据库引擎就行。下载地址：<a href="https://www.microsoft.com/zh-cn/download/details.aspx?id=13255">2010版</a></p>
+<p>但是安装的时候可能会出现问题：你从微软的主页下载，会发现有两个版本，一个是位32位系统准备的，另一个是为64位系统准备的。如果是64位系统，而且项目用到的dll都是64位的，所以要装Microsoft Access Engine-x64，而Win7系统中安装的一般都是32位的Office（32位的Office兼容性更强，稳定性更好），安装的时候就会检测到你机器上安装的是32位的Office,要求你把Office升级到64位，难道要卸载并重装Office？</p>
+<ul>
+<li>打开“运行”然后cmd，输入安装程序的位置并加上“/passive”，如:<code>C:\directory path\AccessDatabaseEngine_x64.exe /passive</code></li>
+<li>安装完成后，“运行”然后regedit，打开:<code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\Common\FilesPaths</code>，删除mso.dll即可。</li>
+</ul>
 
-        <div class="current-tag-container">
-          <h2 class="title">
-            <i class="icon icon-pricetags-outline"></i> Causerie
-          </h2> 
+          </div>
         </div>
 
         
-<section class="post-item">
-    <div class="content">
-      <a href="https://itachijames.github.io//post/RssServiceCompare">
-        <h2 class="post-title">RSS服务使用感受、比较</h2>
-      </a>
-      <div class="post-abstract">
-        
+          <div class="next-post">
+            <a class="purple-link" href="https://itachijames.github.io//post/RegularExpression">
+              <h3 class="post-title">
+                下一篇：正则表达式
+              </h3>
+            </a>
+          </div>
+          
       </div>
-      <div class="post-info">
-        <span><i class="icon icon-calendar-outline"></i> 2016-04-22</span>
-        
-          <span>
-            <i class="icon icon-pricetags-outline"></i>
-            
-              <a href="https://itachijames.github.io//tag/85-YZoviW">
-                Causerie
-                
-              </a>
-            
-          </span>
-        
-      </div>
-    </div>
-    
-  </section>
 
-
-<div class="pagination-container">
-  
-  
-</div>
-
-
-      </div>
+      
 
       <div class="site-footer">
   <div class="slogan">曾经沧海难为水</div>

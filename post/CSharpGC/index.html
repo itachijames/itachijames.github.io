@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>C#垃圾回收 | Parsifal Blog</title>
+<meta name="description" content="曾经沧海难为水">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560675466502">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://itachijames.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://itachijames.github.io/">
+        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560675466502" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://itachijames.github.io/">
+        <h1 class="site-title">Parsifal Blog</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">C#垃圾回收</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2016-06-22</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://itachijames.github.io//tag/ku0c2TA60">
+                    C#
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p><code>C#</code>和<code>Java</code>一样是一款自带了垃圾回收功能的语言，在编程时不需时刻考虑对已分配对象的内存进行回收，而如<code>C++</code>这样没有垃圾回收功能的语言则需考虑对象是否已不可调用，要用<code>delete</code>关键字回收其内存。来讲讲C#中内存回收的一些要点。</p>
+<h2 id="前提">前提</h2>
+<p>讲垃圾回收前需要明白的是<strong>对象</strong>与<strong>引用</strong>之间的关系。我们在定义一个类（当然不是抽象类）之后，C#用<code>new</code>关键字来分配任意数量的对象，注意：<code>new</code>关键字返回的是一个“<strong>堆</strong>”上的引用，而不是真正<strong>对象本身</strong>，这个引用保存在<strong>栈</strong>内。垃圾回收是清除堆上的空间（包括压缩空的内存块）。在面向对象程序中需要用到很多对象，在C#中还分为<strong>值类型</strong>和<strong>引用类型</strong>，这些对象往往在一个函数中，而当程序调用完此函数且不再调用此函数时，函数里调用时分配的对象便不再有意义，而它又占用部分内存空间，此时就需要对其占用的空间进行回收，被称为垃圾回收（当然垃圾回收并不局限于函数调用里对象占用的空间，还包括其他很多情况所占用的空间）。</p>
+<h2 id="generation">generation</h2>
+<p>C#用<strong>generation</strong>（代）对对象进行分类（其实可以理解为一种标识），在.NET4.0后对象一般可分为3代（0代，1代，2代），将0代和1代合称为ephemeral generation（暂时代）。</p>
+<ul>
+<li>0代：从未被标记且将要回收的（新分配的）对象</li>
+<li>1代：上一次回收中没有被回收的对象</li>
+<li>2代：在上一次及以上的垃圾回收后仍未被回收的对象</li>
+</ul>
+<p>垃圾回收器回收时首先检查所有第0代对象，标志这些对象且清理后若得到足够的空闲内存，任何没有被回收的对象则被升至1代；若仍需更多内存，则检查1代对象的“可访问性”并进行回收，没有被回收的1代对象则被升至2代。（这其中还涉及到一个应用程序根“application root”的概念，就不深入研究了）</p>
+<p>.NET4.0之前进行垃圾回收时，对于暂时代的回收，会暂时挂起当前进程中所有活动线程，以确保垃圾回收中不会访问堆，通俗地将就是垃圾回收时会暂停程序以进行垃圾回收；通过专门的线程清理不在暂时代的对象，此时允许程序继续分配堆上的对象。</p>
+<p>.NET4.0后，对于暂时代上的对象，将使用一个<strong>专用后台线程</strong>进行回收，非暂时代的对象使用<strong>后台垃圾回收</strong>。这种改进无疑将提升程序的性能，但需要指出的是垃圾回收本来就可以在无任何人工干预（编程实现）下执行其工作，这种改进对编程人员不是透明的，也无需更多了解。</p>
+<h2 id="systemgc">System.GC</h2>
+<p>垃圾回收无需人为进行干预，但某些情况下可能会需要手动编程以使用垃圾回收：程序即将运行的代码不希望被垃圾回收中断；程序突然分配了很多对象，希望尽可能多的删除已获得的内存。垃圾回收的相关类主要是在mscorlib.dll中的System.GC类。此类中的函数较少，功能也很明确，就不详细说明，值得注意的有以下几点</p>
+<ol>
+<li>
+<p>手动强制垃圾回收（调用<code>Collect()</code>函数）时，应随后调用<code>GC.WaitForPendingFinalizers()</code>函数</p>
+</li>
+<li>
+<p>垃圾回收是回收<strong>托管堆</strong>上的对象，当程序没有使用非托管资源时（如PInvoke服务或COM交互），不需（应该避免）在类中提供<code>Finalize()</code>方法</p>
+</li>
+<li>
+<p>当程序使用了非托管资源，要释放这些资源，在程序中直接重写<code>Finalize()</code>方法将导致编译出错，而应该通过类的<strong>析构函数</strong>（称为终结器）来实现，并且在其中<strong>只</strong>能做清理非托管资源的工作，而不操作其他任何托管对象</p>
+</li>
+<li>
+<p>如果希望立即清除非托管资源，可在类的定义中实现<code>IDisposable</code>接口，在方法<code>Dispose()</code>中既可清理非托管资源，还能处理类中其他对象，在对象离开作用域前<strong>手动</strong>调用<code>Dispose()</code>方法（值得注意的是，并非是垃圾回收器调用<code>Dispose()</code>，用户在手动调用此方法时，对象仍在托管堆上，并可访问所有其他分配在堆上的对象）。为了保证<code>Dispose()</code>的调用，应将其放入一个<code>try/finally</code>逻辑中，若嫌麻烦，可用<code>using</code>关键字，它保证了在退出using块后，“使用”的对象将自动调用<code>Dispose()</code>方法。</p>
+</li>
+<li>
+<p>综合3、4，可在类中既实现<code>Finalize()</code>（通过析构函数），又实现<code>Dispose()</code>（实现<code>IDisposable</code>接口）。用户在类中如此定义时，若用户记得调用<code>Dispose()</code>，则可调用<code>GC.SuppressFinalize()</code>以通知回收器跳过此对象。在类中使用此种方式实现两个方法可能会有部分代码重叠，微软提供了一个官方模板提供参考</p>
+</li>
+</ol>
+<pre><code>class Example : IDisposable
+{
+    private bool disposed = false;
+    public void Dispose()
+    {
+        cleanUp(true);    //true表示用户触发的清理过程
+        GC.SuppressFinalize(this);
+    }
+    private void cleanUp(bool disposing)    //自定义的私有辅助方法
+    {
+        if(!this.disposed)
+        {
+            //释放托管资源
+            //清理非托管资源
+        }
+        disposed = true;    //保证多次调用Dispose()而不出错
+    }
+    ~Example()
+    {
+        cleanUp(false);   //false表示GC出发的清理过程
+    }
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://itachijames.github.io//post/RssServiceCompare">
+              <h3 class="post-title">
+                下一篇：RSS服务使用感受、比较
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">曾经沧海难为水</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/itachijames" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by Gridea | <a class="rss" href="https://itachijames.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
