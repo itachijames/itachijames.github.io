@@ -2,18 +2,235 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://itachijames.github.io/</id>
     <title>Parsifal Blog</title>
-    <updated>2019-06-16T08:00:17.647Z</updated>
+    <updated>2019-06-16T08:44:01.587Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://itachijames.github.io/"/>
     <link rel="self" href="https://itachijames.github.io//atom.xml"/>
-    <subtitle>温故而知新</subtitle>
+    <subtitle>曾经沧海难为水</subtitle>
     <logo>https://itachijames.github.io//images/avatar.png</logo>
     <icon>https://itachijames.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Parsifal Blog</rights>
     <entry>
-        <title type="html"><![CDATA[常规软件]]></title>
-        <id>https://itachijames.github.io//post/RegularSoftware</id>
-        <link href="https://itachijames.github.io//post/RegularSoftware">
+        <title type="html"><![CDATA[正则表达式]]></title>
+        <id>https://itachijames.github.io//post/RegularExpression</id>
+        <link href="https://itachijames.github.io//post/RegularExpression">
+        </link>
+        <updated>2016-06-23T03:20:42.000Z</updated>
+        <summary type="html"><![CDATA[<p>之前做的一个项目里牵涉到很多数学计算，后台计算无非就是写函数实现公式，而经常出错地方的是由于输入不规范导致没法计算，这就牵扯到对于输入验证了，输入验证最简单的方式就是验证控件验证了，这就需要了解正则表达式（这篇文章写得累死了，正则表达式里很多字符和Markdown重叠啊，一不小心就被MD转义了！）</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>之前做的一个项目里牵涉到很多数学计算，后台计算无非就是写函数实现公式，而经常出错地方的是由于输入不规范导致没法计算，这就牵扯到对于输入验证了，输入验证最简单的方式就是验证控件验证了，这就需要了解正则表达式（这篇文章写得累死了，正则表达式里很多字符和Markdown重叠啊，一不小心就被MD转义了！）</p>
+<!-- more -->
+<h2 id="基础">基础</h2>
+<h3 id="行定位符">行定位符</h3>
+<p><code>^</code>表示行的开始，<code>$</code>表示行的结尾</p>
+<p>例：<code>^a</code>表示以字母a开头的字符串，<code>b$</code>表示以字母b结尾的字符串</p>
+<h3 id="单词定界符">单词定界符</h3>
+<p><code>\b</code>表示匹配一个完整的词，<code>\B</code>则匹配不是完整的词，而是一部分</p>
+<p>例：<code>\btm\b</code>表示匹配一个完整的单词“tm”，而<code>\Btm\B</code>则匹配任何出现“tm”的地方，如“html”</p>
+<h3 id="字符类">字符类</h3>
+<p><code>[]</code>匹配任何出现在括号内的字符，注意：一个方括号只能匹配一个字符</p>
+<p>例：<code>[Aa]</code>表示匹配字母a,不区分大小写</p>
+<h3 id="选择字符">选择字符</h3>
+<p><code>|</code>表示“或”，注意：<code>|</code>可以匹配任意长度字符</p>
+<p>例：<code>(a|A)</code>匹配字母a，不区分大小写</p>
+<h3 id="连字符">连字符</h3>
+<p><code>-</code>可见逻辑上相连的字符一起表示</p>
+<p>例：<code>[a-zA-Z]</code>表示匹配所有字母，不区分大小写</p>
+<h3 id="排除字符">排除字符</h3>
+<p><code>^</code>表示排除某字符</p>
+<p>例：<code>[^a-z]</code>表示不以字母和下划线开头的字符</p>
+<h3 id="限定符">限定符</h3>
+<table>
+<thead>
+<tr>
+<th>限定符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>?</code></td>
+<td>匹配前面的字符零次或一次</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>匹配前面的字符一次或多次</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>匹配前面的字符零次或多次</td>
+</tr>
+<tr>
+<td><code>{n}</code></td>
+<td>匹配前面的字符n次</td>
+</tr>
+<tr>
+<td><code>{n,}</code></td>
+<td>匹配前面的字符至少n次</td>
+</tr>
+<tr>
+<td><code>{n,m}</code></td>
+<td>匹配前面的字符至少n次，最多m次</td>
+</tr>
+</tbody>
+</table>
+<h3 id="点字符">点字符</h3>
+<p><code>.</code>可匹配除换行符外任意一个字符</p>
+<p>例：<code>^s.t$</code>可匹配任意以s开头、t结尾、中间只有一个字母的单词，如sit,set</p>
+<h3 id="转义字符">转义字符</h3>
+<p><code>\</code>和大多语言一样，为了将特殊字符转义为普通字符。除此之外还可以显示不可打印字符、指定预定义字符集和定义断言，如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>\a</code></td>
+<td>警报，即ASCII中<BEL>字符（0x07）</td>
+</tr>
+<tr>
+<td><code>\b</code></td>
+<td>退格，即ASCII中<BS>字符（0x08）</td>
+</tr>
+<tr>
+<td><code>\e</code></td>
+<td>退出，即ASCII中<ESC>字符（0x1B）</td>
+</tr>
+<tr>
+<td><code>\f</code></td>
+<td>换页符，即ASCII中<FF>字符（0x0C）</td>
+</tr>
+<tr>
+<td><code>\n</code></td>
+<td>换行符，即ASCII中<LF>字符（0x0A）</td>
+</tr>
+<tr>
+<td><code>\r</code></td>
+<td>回车符，即ASCII中<CR>字符（0x0D）</td>
+</tr>
+<tr>
+<td><code>\t</code></td>
+<td>制表符，即ASCII中<HT>字符（0x09）</td>
+</tr>
+<tr>
+<td><code>\xhh</code></td>
+<td>十六进制代码</td>
+</tr>
+<tr>
+<td><code>\ddd</code></td>
+<td>八进制代码</td>
+</tr>
+<tr>
+<td><code>cx</code></td>
+<td>其中x为任意字符，匹配任何由x指明的控制字符</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>\d</code></td>
+<td>表示任意十进制数字，与[0-9]相同</td>
+</tr>
+<tr>
+<td><code>\D</code></td>
+<td>表示任意非十进制数字</td>
+</tr>
+<tr>
+<td><code>\s</code></td>
+<td>表示任意空白字符，与[\f\n\r\t]相同</td>
+</tr>
+<tr>
+<td><code>\S</code></td>
+<td>表示任意非空白字符</td>
+</tr>
+<tr>
+<td><code>\w</code></td>
+<td>表示任意单词字符，与[a-zA-Z0-9]相同</td>
+</tr>
+<tr>
+<td><code>\W</code></td>
+<td>表示任意非单词字符</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>\A</code></td>
+<td>表示待搜索文本的起始位置</td>
+</tr>
+<tr>
+<td><code>\Z</code></td>
+<td>表示在未指定任何模式下匹配的字符，通常是字符串的末尾或字符串末尾的换行符之前的位置</td>
+</tr>
+<tr>
+<td><code>\z</code></td>
+<td>匹配字符串的末尾而不考虑换行符</td>
+</tr>
+<tr>
+<td><code>\G</code></td>
+<td>表示当前匹配的起始位置</td>
+</tr>
+</tbody>
+</table>
+<h3 id="括号字符">括号字符</h3>
+<p><code>()</code>可改变限定符的作用范围，也可对表达式进行分组</p>
+<h2 id="数字">数字</h2>
+<table width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>释义</th><th>表达式</th></tr><tr><td>数字</td><td>^[0-9]\*$</td></tr><tr><td>整数</td><td>^-?[1-9]\d\*$</td></tr><tr><td>正整数</td><td>^[1-9]\d\*$</td></tr><tr><td>负整数</td><td>^-[1-9]\d\*$</td></tr><tr><td>非负整数</td><td>^[1-9]\d\*|0$</td></tr><tr><td>非正整数</td><td>^-[1-9]\d\*|0$</td></tr><tr><td>n位数字</td><td>^\d{n}$</td></tr><tr><td>至少n位的数字</td><td>^\d{n,}$</td></tr><tr><td>m位到n位的数字</td><td>^\d{m,n}$</td></tr><tr><td>非零开头且最多两位小数的数字</td><td>^([1-9][0-9]\*)+(.[0-9]{1,2})?$</td></tr><tr><td>实数（不包括0）</td><td>^(\-|\+)?\d+(\.\d+)?$</td></tr><tr><td>正浮点数</td><td>^[1-9]\d\*\\.\d\*|0\\.\d\*[1-9]\d\*$</td></tr><tr><td>负浮点数</td><td>^-([1-9]\d\*\\.\d\*|0\\.\d\*[1-9]\d\*)$</td></tr><tr><td>浮点数</td><td>^(-?\d+)(\.\d+)?$ 或 ^-?([1-9]\d\*\.\d\*|0\.\d\*[1-9]\d\*|0?\.0+|0)$</td></tr></tbody></table>
+<h2 id="字符">字符</h2>
+<table width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>释义</th><th>表达式</th></tr><tr><td>英文和数字</td><td>^[A-Za-z0-9]+$ 或 ^[A-Za-z0-9]{4,40}$</td></tr><tr><td>数字和2英文字母的字符串</td><td>^[A-Za-z0-9]+$</td></tr><tr><td>中文、英文、数字、下划线</td><td>^[\u4E00-\u9FA5A-Za-z0-9_]+$</td></tr><tr><td>可以输入含有^%&’,;=?$\”等字符</td><td>[^%&',;=?$\x22]+</td></tr></tbody></table>
+<h2 id="常用">常用</h2>
+<table width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>释义</th><th>表达式</th></tr><tr><td>18位身份证</td><td>^(\d{6})(\d{4})(\d{2})(\d{2})(\d{3})([0-9]|X)$</td></tr><tr><td>日期格式（严格匹配：年-月-日）</td><td>([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8])))</td></tr><tr><td>我国邮编</td><td>[1-9]\d{5}(?!\d)</td></tr><tr><td>国内电话号码</td><td>\d{3}-\d{8}|\d{4}-\{7,8}</td></tr><tr><td>网址匹配</td><td>[a-zA-z]+://[^\s]\*</td></tr><tr><td>邮箱匹配</td><td>^\w+([-+.]\w+)\*@\w+([-.]\w+)\*\.\w+([-.]\w+)\*$ 或 [\w!#$%&'\*+/=?^\_\`{|}~-]+(?:\.[\w!#$%&'\*+/=?^\_\`{|}~-]+)\*@(?:[\w]\(?:[\w-]\*[\w])?\.)+[\w]\(?:[\w-]\*[\w])?</td></tr><tr><td>中文字符</td><td>[\u4e00-\u9fa5]</td></tr><tr><td>密码(以字母开头，长度在6~18之间，只能包含字母、数字和下划线)</td><td>^[a-zA-Z]\w{5,17}$</td></tr><tr><td>强密码(必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-10之间)</td><td>^(?=.\*\d)(?=.\*[a-z])(?=.\*[A-Z]).{8,10}$</td></tr><tr><td>IP</td><td>\d+\.\d+\.\d+\.\d+</td></tr><tr><td>强IP匹配</td><td>((?:(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d))</td></tr></tbody></table>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[RSS服务使用感受、比较]]></title>
+        <id>https://itachijames.github.io//post/RssServiceCompare</id>
+        <link href="https://itachijames.github.io//post/RssServiceCompare">
+        </link>
+        <updated>2016-04-22T08:28:40.000Z</updated>
+        <content type="html"><![CDATA[<p>刚上大学那会看新闻都是从新浪、网易这种门户网站获取资讯的（还有在人人网的人人小站里，估计这东西现在都没几个人用了），没事的时候进入网站，点了一个连接，看完一条新闻后往往又会点页面下方相关新闻和最近其他新闻，这样一搞时间不知不觉地从指间溜走。后来读了研后觉得这样浪费时间，实在没效率，就开始用RSS开始读新闻了，自己订阅想看的网站，专注看新闻。前前后后试用了十多款RSS订阅服务，就来比较一下各自的差异，主要比较的是各RSS的Web服务及其<strong>iOS客户端</strong>体验。</p>
+<h2 id="inoreader"><a href="http://www.inoreader.com/">Inoreader</a></h2>
+<p>国外的一款服务，功能丰富，在体验了这么多款服务后觉得这家做得最好、最值得推荐。Web网页文章打开很快，网站可设置只为中文，自定义功能选项十分多，网页略有广告，不过可以使用浏览器插件屏蔽。订阅源抓取速度很快，也可自行加强订阅源获取周期，不过免费用户有加强数目限制。</p>
+<p>iOS客户端仍在更新，其界面和其他服务的客户端相比十分简洁，并且没有推荐、热点（使用RSS不就是想只看点自己订阅的东西吗？还用得着你给我推荐东西给我看，那样用RSS的意义又何在？），对订阅文章的操作主要有加星标、保存页面和加标签，加上订阅正好构成了App底栏的4个TabBar；应用设计的很简洁，交互逻辑很清楚，操作十分流畅。刷新订阅列表时显示每个订阅的未读条目，连接情况良好，每次刷新列表都会重新抓取，但有时点击某个订阅进入其文章列表时会显示网络故障“请求超时”，显示不了任何文章，这大概是Inoreader这款服务在我眼里唯一的缺点了。应用不会占据很大储存空间，可能是会定期删掉早期的文章缓存。</p>
+<h2 id="feedly"><a href="http://feedly.com/">Feedly</a></h2>
+<p>Google Reader死后很多人在用的代替品，很多RSS服务都支持Feedly。网站经常打不开，有时要刷新几遍才能打开，被墙的厉害，可设置项不如Inoreader多。iOS客户端设计的还是挺漂亮，但交互体验很差，或是根本不能理解其逻辑，一会是订阅的一篇文章占据整个页面，一滑又转到文章列表，逻辑十分混乱。文章列表显示预览时总是不能显示文章里的图片，但又留了个纯白图片的区域在那；经常刷新不了文章列表，有时在wifi下显示网络错误但切换成移动网络又可以刷新。</p>
+<h2 id="newsblur"><a href="http://www.newsblur.com/">NewsBlur</a></h2>
+<p>一款国内比较少人使用的RSS服务，Web端设计的比较“缺少设计美感”，阅读页面被拆分为左中右三块，分别为订阅列表、文章列表、文章详情，可设置的内容较丰富，升级账号的费用要24刀，比其他的都要贵些。iOS端设计延续了Web端的丑，但其网络环境是所有国外服务中最好的，基本没出现过任何情况（这也是增加好感的重要一点）；滑动操作有时会很卡，手指大幅滑动却只滑动一点，估计是文章在加载（想念Inoreader的丝滑流畅）；应用可以设置四种主题。免费帐户最多只能订阅64个网站，不过对于一般用户也够了。</p>
+<h2 id="digg"><a href="http://digg.com/reader">Digg</a></h2>
+<p>Digg其实是一款新闻资讯网站，不过在GR死后说要继承其衣钵，又增加了RSS服务，Web端没什么特别的优点，可设置的选项很少；订阅源抓取速度不够快（我有个订阅源，只抓到半年前的文章，不知道什么原因）。iOS客户端进去时还是个资讯客户端，可以看新闻（都是英文的啦），需要登录账号后应用才显示底部订阅TabBar。应用大量使用白底（和Feedly一样），是很好看但有些晃眼；网络连接情况没有Inoreader快，但比Feedly好。</p>
+<h2 id="aol-reader"><a href="http://reader.aol.com/">Aol Reader</a></h2>
+<p>一款国外的RSS服务，Web端做的挺漂亮，可设置为中文界面。iOS客户端功能设计简洁，不过有时根本连接不到服务器，让我没有继续使用的耐性。</p>
+<h2 id="the-old-reader"><a href="https://theoldreader.com/">The Old Reader</a></h2>
+<p>国外的一款还不错的服务，网页风格和GR类似，可设为中文，各项功能齐全，页面漂亮简介，可惜的是没有iOS客户端，只能通过第三方的应用查看订阅。</p>
+<h2 id="一览"><a href="http://yilan.io/">一览</a></h2>
+<p>这个并不是豌豆荚一览，它就叫“一览”。所有国内的RSS服务的优点都是网络环境，缺点都是自作主张的有热门推荐之类的功能。一览整合了国内的资讯服务，只需通过资讯名查找订阅而不需要XML，一些无法通过Feed订阅的如微博或是lofter博客都可以订阅。值得吐槽的是它Web端logo旁显示的依然是Beta，公测要这么久？！iOS客户端设计的还行，有一些好的功能，比如可根据时间自动切换主题；不过也有鸡肋功能，比如语音播放文章（真的有人要用到这个？竟然还把按钮直接放在文章上部中间位置，搞得连点击时间返回顶部的系统功能都不好用了），不过让我弃用它的真正原因是设置中删除缓存功能，阅读文章自然会产生缓存，而官方应用的删除缓存没有任何作用，每次点击时不仅没有任何反馈，而且根本没有真正删除缓存，进入“系统储存空间”一看还是占据那么多空间，用了一段时间后占着将近1G多的空间啊！感情删除缓存的按钮只有个安慰作用！</p>
+<h2 id="深蓝阅读">深蓝阅读</h2>
+<p>很烂的服务，iOS端竟然有整屏的第三方广告，简直不能忍，试用了一会马上删除，并没有什么好讲的。</p>
+<h2 id="zakerflipboard">ZAKER/Flipboard</h2>
+<p>这两个是第三方的新闻聚合应用，可以在其中自由订阅想看的新闻，可以说是种间接的RSS。一开始使用的是Flipboard，因为当时是用的三星，而三星直接将其整合到Touchwiz中，使用了一段时间发现其中的新闻源和我口味似乎没有那么贴切，再后来又发现这货竟然是中国特版的，就弃用了——最讨厌被差别对待了好吗！印象笔记也是这么弃用的。后来用了ZAKER，毕竟是国内公司做的，里面的新闻要更合我意。经常在Wifi下打开新闻，断网后看缓存，导致应用经常占据几百兆的空间，不过这并不是什么大问题。后来发现这样看新闻还是浪费时间，推荐的新闻就在首页，没有强烈的意思要去看但还是点了进去；再加上应用时不时的广告也就弃用了，坚定的转移到RSS阵营。</p>
+<p>除了这些外还试用一些其他服务，体验了一些iOS客户端和第三方客户端，如BazQux、Unread、feeder.co（付费）、Feeddler RSS Reader、Feed Wrangler（付费）、Newsify、Feedoo等，没有使用有很多的因素。通过对比发现国内国外的服务，发现还是有很大的差异：国外的专注做RSS服务，网站的中心就是用户订阅列表，提供大量设置选项；而国内服务则侧重资讯的整合，RSS相关的设置、功能不够丰富。</p>
+<p>总结来说本人认为现在最好的订阅服务是Inoreader，其客户端也还不错，推荐使用；此外NewsBlur和一览都是不错的选择。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[VS代码片段]]></title>
+        <id>https://itachijames.github.io//post/VSCodeSnippets</id>
+        <link href="https://itachijames.github.io//post/VSCodeSnippets">
+        </link>
+        <updated>2016-04-01T08:19:24.000Z</updated>
+        <content type="html"><![CDATA[<p>Visual Studio中开发中总有些常用到的代码段，如果一个字母的敲必然很是繁琐，故微软在其主要的IDE中集成了代码片段和代码围绕，程序员在编程时只需敲出触发关键字就可自动生成完整代码段模板，再对模板进行部分修改即可。如需在命令行输出一段字符并自动换行，在程序代码中只需打出 <code>cw</code> 然后按下两次 Tab 键，程序自动填充出<code>Console.WriteLine();</code> ，并且光标自动定位到括号内，只需打出你要输出的字符串即可。</p>
+<p>以下是VS自带的一些个人常用的代码片段，在编程时敲出关键字后需连按两次 “Tab”。在“工具”下的“代码段管理器”中可查看VS所有代码片段。</p>
+<table style="font-size: 10pt;" width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>代码片段名</th><th>描述</th></tr><tr><td>~</td><td>析构函数</td></tr><tr><td>#region</td><td>插入 #region 和 #endregion</td></tr><tr><td>ctor</td><td>构造函数</td></tr><tr><td>cw</td><td>命令行打印输出: Console.WriteLine();</td></tr><tr><td>do</td><td>do-while 块</td></tr><tr><td>equals</td><td>重写(非重载)一个从 System.Object 继承的 Equals 方法</td></tr><tr><td>Exception</td><td>声明一个派生自 System.Exception 的应用程序异常</td></tr><tr><td>for</td><td>for 循环</td></tr><tr><td>forr</td><td>反向 for 循环</td></tr><tr><td>mbox</td><td>弹框提醒: MessageBox.Show();</td></tr><tr><td>prop</td><td>自动属性</td></tr><tr><td>propg</td><td>只读属性块( 公开 get ;私有 set)</td></tr><tr><td>propfull</td><td>具有完整的 get/set 访问器的属性</td></tr><tr><td>sim</td><td>插入返回值为整数的静态入口方法</td></tr><tr><td>svm</td><td>插入返回为空的静态入口方法</td></tr><tr><td>try</td><td>try-catch 块</td></tr><tr><td>tryf</td><td>try-finally 块</td></tr></tbody></table>]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[常规软件下载连接]]></title>
+        <id>https://itachijames.github.io//post/RegularSoftwareLink</id>
+        <link href="https://itachijames.github.io//post/RegularSoftwareLink">
         </link>
         <updated>2016-01-01T07:41:33.000Z</updated>
         <content type="html"><![CDATA[<p>个人所用软件做个汇总下载地址，方便不时之需</p>

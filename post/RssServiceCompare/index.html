@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>RSS服务使用感受、比较 | Parsifal Blog</title>
+<meta name="description" content="曾经沧海难为水">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560674639634">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://itachijames.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://itachijames.github.io/">
+        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560674639634" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://itachijames.github.io/">
+        <h1 class="site-title">Parsifal Blog</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="menu purple-link">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">RSS服务使用感受、比较</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2016-04-22</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://itachijames.github.io//tag/85-YZoviW">
+                    Causerie
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p>刚上大学那会看新闻都是从新浪、网易这种门户网站获取资讯的（还有在人人网的人人小站里，估计这东西现在都没几个人用了），没事的时候进入网站，点了一个连接，看完一条新闻后往往又会点页面下方相关新闻和最近其他新闻，这样一搞时间不知不觉地从指间溜走。后来读了研后觉得这样浪费时间，实在没效率，就开始用RSS开始读新闻了，自己订阅想看的网站，专注看新闻。前前后后试用了十多款RSS订阅服务，就来比较一下各自的差异，主要比较的是各RSS的Web服务及其<strong>iOS客户端</strong>体验。</p>
+<h2 id="inoreader"><a href="http://www.inoreader.com/">Inoreader</a></h2>
+<p>国外的一款服务，功能丰富，在体验了这么多款服务后觉得这家做得最好、最值得推荐。Web网页文章打开很快，网站可设置只为中文，自定义功能选项十分多，网页略有广告，不过可以使用浏览器插件屏蔽。订阅源抓取速度很快，也可自行加强订阅源获取周期，不过免费用户有加强数目限制。</p>
+<p>iOS客户端仍在更新，其界面和其他服务的客户端相比十分简洁，并且没有推荐、热点（使用RSS不就是想只看点自己订阅的东西吗？还用得着你给我推荐东西给我看，那样用RSS的意义又何在？），对订阅文章的操作主要有加星标、保存页面和加标签，加上订阅正好构成了App底栏的4个TabBar；应用设计的很简洁，交互逻辑很清楚，操作十分流畅。刷新订阅列表时显示每个订阅的未读条目，连接情况良好，每次刷新列表都会重新抓取，但有时点击某个订阅进入其文章列表时会显示网络故障“请求超时”，显示不了任何文章，这大概是Inoreader这款服务在我眼里唯一的缺点了。应用不会占据很大储存空间，可能是会定期删掉早期的文章缓存。</p>
+<h2 id="feedly"><a href="http://feedly.com/">Feedly</a></h2>
+<p>Google Reader死后很多人在用的代替品，很多RSS服务都支持Feedly。网站经常打不开，有时要刷新几遍才能打开，被墙的厉害，可设置项不如Inoreader多。iOS客户端设计的还是挺漂亮，但交互体验很差，或是根本不能理解其逻辑，一会是订阅的一篇文章占据整个页面，一滑又转到文章列表，逻辑十分混乱。文章列表显示预览时总是不能显示文章里的图片，但又留了个纯白图片的区域在那；经常刷新不了文章列表，有时在wifi下显示网络错误但切换成移动网络又可以刷新。</p>
+<h2 id="newsblur"><a href="http://www.newsblur.com/">NewsBlur</a></h2>
+<p>一款国内比较少人使用的RSS服务，Web端设计的比较“缺少设计美感”，阅读页面被拆分为左中右三块，分别为订阅列表、文章列表、文章详情，可设置的内容较丰富，升级账号的费用要24刀，比其他的都要贵些。iOS端设计延续了Web端的丑，但其网络环境是所有国外服务中最好的，基本没出现过任何情况（这也是增加好感的重要一点）；滑动操作有时会很卡，手指大幅滑动却只滑动一点，估计是文章在加载（想念Inoreader的丝滑流畅）；应用可以设置四种主题。免费帐户最多只能订阅64个网站，不过对于一般用户也够了。</p>
+<h2 id="digg"><a href="http://digg.com/reader">Digg</a></h2>
+<p>Digg其实是一款新闻资讯网站，不过在GR死后说要继承其衣钵，又增加了RSS服务，Web端没什么特别的优点，可设置的选项很少；订阅源抓取速度不够快（我有个订阅源，只抓到半年前的文章，不知道什么原因）。iOS客户端进去时还是个资讯客户端，可以看新闻（都是英文的啦），需要登录账号后应用才显示底部订阅TabBar。应用大量使用白底（和Feedly一样），是很好看但有些晃眼；网络连接情况没有Inoreader快，但比Feedly好。</p>
+<h2 id="aol-reader"><a href="http://reader.aol.com/">Aol Reader</a></h2>
+<p>一款国外的RSS服务，Web端做的挺漂亮，可设置为中文界面。iOS客户端功能设计简洁，不过有时根本连接不到服务器，让我没有继续使用的耐性。</p>
+<h2 id="the-old-reader"><a href="https://theoldreader.com/">The Old Reader</a></h2>
+<p>国外的一款还不错的服务，网页风格和GR类似，可设为中文，各项功能齐全，页面漂亮简介，可惜的是没有iOS客户端，只能通过第三方的应用查看订阅。</p>
+<h2 id="一览"><a href="http://yilan.io/">一览</a></h2>
+<p>这个并不是豌豆荚一览，它就叫“一览”。所有国内的RSS服务的优点都是网络环境，缺点都是自作主张的有热门推荐之类的功能。一览整合了国内的资讯服务，只需通过资讯名查找订阅而不需要XML，一些无法通过Feed订阅的如微博或是lofter博客都可以订阅。值得吐槽的是它Web端logo旁显示的依然是Beta，公测要这么久？！iOS客户端设计的还行，有一些好的功能，比如可根据时间自动切换主题；不过也有鸡肋功能，比如语音播放文章（真的有人要用到这个？竟然还把按钮直接放在文章上部中间位置，搞得连点击时间返回顶部的系统功能都不好用了），不过让我弃用它的真正原因是设置中删除缓存功能，阅读文章自然会产生缓存，而官方应用的删除缓存没有任何作用，每次点击时不仅没有任何反馈，而且根本没有真正删除缓存，进入“系统储存空间”一看还是占据那么多空间，用了一段时间后占着将近1G多的空间啊！感情删除缓存的按钮只有个安慰作用！</p>
+<h2 id="深蓝阅读">深蓝阅读</h2>
+<p>很烂的服务，iOS端竟然有整屏的第三方广告，简直不能忍，试用了一会马上删除，并没有什么好讲的。</p>
+<h2 id="zakerflipboard">ZAKER/Flipboard</h2>
+<p>这两个是第三方的新闻聚合应用，可以在其中自由订阅想看的新闻，可以说是种间接的RSS。一开始使用的是Flipboard，因为当时是用的三星，而三星直接将其整合到Touchwiz中，使用了一段时间发现其中的新闻源和我口味似乎没有那么贴切，再后来又发现这货竟然是中国特版的，就弃用了——最讨厌被差别对待了好吗！印象笔记也是这么弃用的。后来用了ZAKER，毕竟是国内公司做的，里面的新闻要更合我意。经常在Wifi下打开新闻，断网后看缓存，导致应用经常占据几百兆的空间，不过这并不是什么大问题。后来发现这样看新闻还是浪费时间，推荐的新闻就在首页，没有强烈的意思要去看但还是点了进去；再加上应用时不时的广告也就弃用了，坚定的转移到RSS阵营。</p>
+<p>除了这些外还试用一些其他服务，体验了一些iOS客户端和第三方客户端，如BazQux、Unread、feeder.co（付费）、Feeddler RSS Reader、Feed Wrangler（付费）、Newsify、Feedoo等，没有使用有很多的因素。通过对比发现国内国外的服务，发现还是有很大的差异：国外的专注做RSS服务，网站的中心就是用户订阅列表，提供大量设置选项；而国内服务则侧重资讯的整合，RSS相关的设置、功能不够丰富。</p>
+<p>总结来说本人认为现在最好的订阅服务是Inoreader，其客户端也还不错，推荐使用；此外NewsBlur和一览都是不错的选择。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://itachijames.github.io//post/VSCodeSnippets">
+              <h3 class="post-title">
+                下一篇：VS代码片段
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">曾经沧海难为水</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/itachijames" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by Gridea | <a class="rss" href="https://itachijames.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
