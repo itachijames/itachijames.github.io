@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>C#中结构体性质 | Parsifal Blog</title>
+<meta name="description" content="曾经沧海难为水">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560676321171">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://itachijames.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://itachijames.github.io/">
+        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560676321171" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://itachijames.github.io/">
+        <h1 class="site-title">Parsifal Blog</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">C#中结构体性质</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-06-16</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://itachijames.github.io//tag/NVSxtmrBC">
+                    .NetCore
+                    
+                      ，
+                    
+                  </a>
+                
+                  <a href="https://itachijames.github.io//tag/ku0c2TA60">
+                    C#
+                    
+                      ，
+                    
+                  </a>
+                
+                  <a href="https://itachijames.github.io//tag/nYk7g7sa1">
+                    Issue
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <h1 id="c结构体性质">C#结构体性质</h1>
+<p>在.Net程序开发中与外部系统（如嵌入式软件，C/C++）进行通信时，会调用一些非托管的库，DllImport方式调用这些库时需根据库的头文件写出对应的PInvoke方法，按照规约定义好方法的参数。这类库通常会自定义一些结构体类型做为参数或返回值，由于C/C++中的结构体与C#中的结构体<code>struct</code>并不完全相同，稍不注意就会数据错误，且这种错误不会抛出异常，所以极其隐蔽、很难发现。<br>
+现对C#中的<code>strucr</code>的特殊性质做些整理说明</p>
+<ul>
+<li>结构体的分配的内存大小与字段的排序有关</li>
+<li>结构体的分配的内存大小与各字段的类型字节相关</li>
+</ul>
+<p>现举例说明，测试环境以Win10 *64 + .NetCore 2.1.403 + VS2017为测试环境，测量对象大小采用<code>Marshal.SizeOf(var)</code> ，测量类型大小采用<code>sizeof(type)</code>。</p>
+<h3 id="基本类型分配内存大小">基本类型分配内存大小</h3>
+<pre><code class="language-C#">var a = sizeof(byte);//1
+var b = sizeof(char);//2
+var c = sizeof(int);//4
+var d = sizeof(float);//4
+var e = sizeof(long);//8
+var f = sizeof(double);//8
+var g = sizeof(decimal);//16
+</code></pre>
+<h3 id="结构体大小">结构体大小</h3>
+<pre><code class="language-C#">using System;
+using System.Runtime.InteropServices;
+public struct StructTest1
+{
+    public byte A;
+    public int B;
+    public double C;
+}
+public struct StructTest2
+{
+    public int A;
+    public double B;
+    public byte C;
+}
+public struct StructTestAPI
+{
+    int X;
+    char Y[8];
+    double Z[3];
+}
+public struct StructTest3
+{
+    public int A;
+    public long B;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3, ArraySubType = UnmanagedType.R8)]
+    public double[] C;//长为3的double数组
+}
+public struct StructTest4
+{
+    public int A;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8, ArraySubType = UnmanagedType.I8)]
+    public byte[] B;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3, ArraySubType = UnmanagedType.R8)]
+    public double[] C;//长为3的double数组
+}
+
+StructTest1 st1 = new StructTest1();
+var s1 = Marshal.SizeOf(st1);//16
+StructTest2 st2 = new StructTest2();
+var s2 = Marshal.SizeOf(st2);//24
+StructTest3 st3 = new StructTest3();
+StructTest4 st4 = new StructTest4();
+</code></pre>
+<p>由s1的大小可知结构体的大小并不是简单的将各个字段相加后的大小（1+4+8=13≠16）。这涉及到.Net在处理结构体时对其进行了特殊处理：结构体为值类型，存在栈上，为了避免多次访问栈，.Net对结构体进行了一个对齐操作——<em>如果某个字段的长度大于或等于对齐长度，则对齐无用；如果小于对齐长度，则以对齐长度为单元，占用的空间是对齐长度的整数倍，同时保证不大于对齐长度的字段一定分配在同一单元，并且其首地址一定是字段长度的整数倍</em>。若没有显式指定对齐长度，将以结构中占用空间<strong>最大成员的长度</strong>作为对齐长度。</p>
+<p>根据对齐操作的说明，可知s1的内存分配情况为：第0个字节为字段A；第1-3个字节对齐操作自动补上的空字节，为无意义字节；第4-7个字节为字段B；第8-15个字节为字段C。</p>
+<p>由s2与s1的对比可知结构体字段间的排序对整个结构体大小有影响。根据<strong>结构体分配在栈上的连续空间</strong>特点，并结合对齐操作，易知s2的内存分配情况为：第0-3字节为字段A；第4-7字节为补齐字节；第8-15为字段B；第16个字节为字段C；第18-23为补齐字节。</p>
+<p>st3与st4的例子是在对接其他项目时遇到的一个问题示例。对方C++库的方法定义的结构体并没有遵循将<strong>大字节的字段放前面</strong>的原则，对方发过来的数据结构形如<code>StructTestAPI</code>，在其C++程序中为36字节的变量。当我用<code>StructTest3</code>去接数据时，生成的结构体为一40字节（4+4+8+8*3）的对象，int变量A和double数组C接收正常，但long类型的B就错误：经.Net对齐操作后源数据会在<code>StructTestAPI.Y</code> 的内存后添加4个补齐字节，用<code>StructTest3</code>去接时，long类型的B字段会接到源char数组的后四位及4个补齐字节，自然不正确了。</p>
+<p>当换用<code>StructTest4</code>去接数据时就正常了，它不会接到4个补齐字节。注意：这里B用的是<code>byte[]</code>而非<code>char[]</code>，是因为C++中char为1个字节而C#中char为2个字节。其实<code>StructTest4</code>里将B的<code>SizeConst</code>设置为12时，程序也能正常接到数据不会报错、异常，观察内存就可以知道其将4个补齐字节也接到了。</p>
+<h3 id="特例">特例</h3>
+<p>结构体对齐操作的最大成员长度的原则对<code>decimal</code>类型并不适用。</p>
+<pre><code class="language-C#">public struct StructTest5
+{
+    public int A;
+    public decimal B;
+    public double C;
+}
+StructTest5 st5 = new StructTest5();
+var s5 = Marshal.SizeOf(st5);//32
+</code></pre>
+<p><code>StructTest5</code>的大小并不是按照之前对齐操作后的48的字节所料，而是32个字节。这是因为C#中<code>decimal</code>是由4个<code>int</code>构成的一个结构体变量，并不是单纯的16字节的变量。</p>
+<pre><code class="language-C#">struct Decimal
+{
+    private int flags;
+    private int hi;
+    private int mid;
+    private int lo;    
+}
+</code></pre>
+<p>故<code>StructTest5</code>里的最大成员是double，对齐长度为8。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://itachijames.github.io//post/PortOccuptQuery">
+              <h3 class="post-title">
+                下一篇：端口占用
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <div class="slogan">曾经沧海难为水</div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/itachijames" target="_blank">
+          <i class="fab fa-github"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by Gridea | <a class="rss" href="https://itachijames.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

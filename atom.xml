@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://itachijames.github.io/</id>
     <title>Parsifal Blog</title>
-    <updated>2019-06-16T08:58:53.494Z</updated>
+    <updated>2019-06-16T09:12:14.260Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://itachijames.github.io/"/>
     <link rel="self" href="https://itachijames.github.io//atom.xml"/>
@@ -10,6 +10,461 @@
     <logo>https://itachijames.github.io//images/avatar.png</logo>
     <icon>https://itachijames.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Parsifal Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[C#中结构体性质]]></title>
+        <id>https://itachijames.github.io//post/CSharpStructNature</id>
+        <link href="https://itachijames.github.io//post/CSharpStructNature">
+        </link>
+        <updated>2019-06-16T09:09:53.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="c结构体性质">C#结构体性质</h1>
+<p>在.Net程序开发中与外部系统（如嵌入式软件，C/C++）进行通信时，会调用一些非托管的库，DllImport方式调用这些库时需根据库的头文件写出对应的PInvoke方法，按照规约定义好方法的参数。这类库通常会自定义一些结构体类型做为参数或返回值，由于C/C++中的结构体与C#中的结构体<code>struct</code>并不完全相同，稍不注意就会数据错误，且这种错误不会抛出异常，所以极其隐蔽、很难发现。<br>
+现对C#中的<code>strucr</code>的特殊性质做些整理说明</p>
+<ul>
+<li>结构体的分配的内存大小与字段的排序有关</li>
+<li>结构体的分配的内存大小与各字段的类型字节相关</li>
+</ul>
+<p>现举例说明，测试环境以Win10 *64 + .NetCore 2.1.403 + VS2017为测试环境，测量对象大小采用<code>Marshal.SizeOf(var)</code> ，测量类型大小采用<code>sizeof(type)</code>。</p>
+<h3 id="基本类型分配内存大小">基本类型分配内存大小</h3>
+<pre><code class="language-C#">var a = sizeof(byte);//1
+var b = sizeof(char);//2
+var c = sizeof(int);//4
+var d = sizeof(float);//4
+var e = sizeof(long);//8
+var f = sizeof(double);//8
+var g = sizeof(decimal);//16
+</code></pre>
+<h3 id="结构体大小">结构体大小</h3>
+<pre><code class="language-C#">using System;
+using System.Runtime.InteropServices;
+public struct StructTest1
+{
+    public byte A;
+    public int B;
+    public double C;
+}
+public struct StructTest2
+{
+    public int A;
+    public double B;
+    public byte C;
+}
+public struct StructTestAPI
+{
+    int X;
+    char Y[8];
+    double Z[3];
+}
+public struct StructTest3
+{
+    public int A;
+    public long B;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3, ArraySubType = UnmanagedType.R8)]
+    public double[] C;//长为3的double数组
+}
+public struct StructTest4
+{
+    public int A;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8, ArraySubType = UnmanagedType.I8)]
+    public byte[] B;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3, ArraySubType = UnmanagedType.R8)]
+    public double[] C;//长为3的double数组
+}
+
+StructTest1 st1 = new StructTest1();
+var s1 = Marshal.SizeOf(st1);//16
+StructTest2 st2 = new StructTest2();
+var s2 = Marshal.SizeOf(st2);//24
+StructTest3 st3 = new StructTest3();
+StructTest4 st4 = new StructTest4();
+</code></pre>
+<p>由s1的大小可知结构体的大小并不是简单的将各个字段相加后的大小（1+4+8=13≠16）。这涉及到.Net在处理结构体时对其进行了特殊处理：结构体为值类型，存在栈上，为了避免多次访问栈，.Net对结构体进行了一个对齐操作——<em>如果某个字段的长度大于或等于对齐长度，则对齐无用；如果小于对齐长度，则以对齐长度为单元，占用的空间是对齐长度的整数倍，同时保证不大于对齐长度的字段一定分配在同一单元，并且其首地址一定是字段长度的整数倍</em>。若没有显式指定对齐长度，将以结构中占用空间<strong>最大成员的长度</strong>作为对齐长度。</p>
+<p>根据对齐操作的说明，可知s1的内存分配情况为：第0个字节为字段A；第1-3个字节对齐操作自动补上的空字节，为无意义字节；第4-7个字节为字段B；第8-15个字节为字段C。</p>
+<p>由s2与s1的对比可知结构体字段间的排序对整个结构体大小有影响。根据<strong>结构体分配在栈上的连续空间</strong>特点，并结合对齐操作，易知s2的内存分配情况为：第0-3字节为字段A；第4-7字节为补齐字节；第8-15为字段B；第16个字节为字段C；第18-23为补齐字节。</p>
+<p>st3与st4的例子是在对接其他项目时遇到的一个问题示例。对方C++库的方法定义的结构体并没有遵循将<strong>大字节的字段放前面</strong>的原则，对方发过来的数据结构形如<code>StructTestAPI</code>，在其C++程序中为36字节的变量。当我用<code>StructTest3</code>去接数据时，生成的结构体为一40字节（4+4+8+8*3）的对象，int变量A和double数组C接收正常，但long类型的B就错误：经.Net对齐操作后源数据会在<code>StructTestAPI.Y</code> 的内存后添加4个补齐字节，用<code>StructTest3</code>去接时，long类型的B字段会接到源char数组的后四位及4个补齐字节，自然不正确了。</p>
+<p>当换用<code>StructTest4</code>去接数据时就正常了，它不会接到4个补齐字节。注意：这里B用的是<code>byte[]</code>而非<code>char[]</code>，是因为C++中char为1个字节而C#中char为2个字节。其实<code>StructTest4</code>里将B的<code>SizeConst</code>设置为12时，程序也能正常接到数据不会报错、异常，观察内存就可以知道其将4个补齐字节也接到了。</p>
+<h3 id="特例">特例</h3>
+<p>结构体对齐操作的最大成员长度的原则对<code>decimal</code>类型并不适用。</p>
+<pre><code class="language-C#">public struct StructTest5
+{
+    public int A;
+    public decimal B;
+    public double C;
+}
+StructTest5 st5 = new StructTest5();
+var s5 = Marshal.SizeOf(st5);//32
+</code></pre>
+<p><code>StructTest5</code>的大小并不是按照之前对齐操作后的48的字节所料，而是32个字节。这是因为C#中<code>decimal</code>是由4个<code>int</code>构成的一个结构体变量，并不是单纯的16字节的变量。</p>
+<pre><code class="language-C#">struct Decimal
+{
+    private int flags;
+    private int hi;
+    private int mid;
+    private int lo;    
+}
+</code></pre>
+<p>故<code>StructTest5</code>里的最大成员是double，对齐长度为8。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[端口占用]]></title>
+        <id>https://itachijames.github.io//post/PortOccuptQuery</id>
+        <link href="https://itachijames.github.io//post/PortOccuptQuery">
+        </link>
+        <updated>2019-06-16T09:07:37.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="查看端口占用-解决">查看端口占用、解决</h1>
+<ol start="0">
+<li>命令 <code>netstat -ano</code> 可查看所有端口使用情况</li>
+<li>执行 <code>netstat -ano|findstr &quot;xxxx&quot;</code> 输入对应的端口</li>
+<li>找到对应的pid并执行 <code>tasklist|findstr &quot;yyyy&quot;</code> 输入对应的pid</li>
+<li>结束其进程解除占用 <code>taskkill /f /pid &quot;yyyy&quot;</code></li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ASCII码表]]></title>
+        <id>https://itachijames.github.io//post/Ascii</id>
+        <link href="https://itachijames.github.io//post/Ascii">
+        </link>
+        <updated>2019-06-16T09:06:33.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="ascii码表">ASCII码表</h1>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">ASCII值</th>
+<th>控制字符</th>
+<th style="text-align:center">ASCII值</th>
+<th>控制字符</th>
+<th style="text-align:center">ASCII值</th>
+<th>控制字符</th>
+<th style="text-align:center">ASCII值</th>
+<th>控制字符</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td>NUL（空字符）</td>
+<td style="text-align:center">32</td>
+<td>(space)</td>
+<td style="text-align:center">64</td>
+<td>@</td>
+<td style="text-align:center">96</td>
+<td>`</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td>SOH（标题开始）</td>
+<td style="text-align:center">33</td>
+<td>!</td>
+<td style="text-align:center">65</td>
+<td>A</td>
+<td style="text-align:center">97</td>
+<td>a</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td>STX（正文开始）</td>
+<td style="text-align:center">34</td>
+<td>&quot;</td>
+<td style="text-align:center">66</td>
+<td>B</td>
+<td style="text-align:center">98</td>
+<td>b</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td>ETX（正文结束）</td>
+<td style="text-align:center">35</td>
+<td>#</td>
+<td style="text-align:center">67</td>
+<td>C</td>
+<td style="text-align:center">99</td>
+<td>c</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td>EOT（传输结束）</td>
+<td style="text-align:center">36</td>
+<td>$</td>
+<td style="text-align:center">68</td>
+<td>D</td>
+<td style="text-align:center">100</td>
+<td>d</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td>ENQ（询问）</td>
+<td style="text-align:center">37</td>
+<td>%</td>
+<td style="text-align:center">69</td>
+<td>E</td>
+<td style="text-align:center">101</td>
+<td>e</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td>ACK（肯定回应）</td>
+<td style="text-align:center">38</td>
+<td>&amp;</td>
+<td style="text-align:center">70</td>
+<td>F</td>
+<td style="text-align:center">102</td>
+<td>f</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td>BEL（响铃）</td>
+<td style="text-align:center">39</td>
+<td>‘</td>
+<td style="text-align:center">71</td>
+<td>G</td>
+<td style="text-align:center">103</td>
+<td>g</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td>BS（退格）</td>
+<td style="text-align:center">40</td>
+<td>(</td>
+<td style="text-align:center">72</td>
+<td>H</td>
+<td style="text-align:center">104</td>
+<td>h</td>
+</tr>
+<tr>
+<td style="text-align:center">9</td>
+<td>HT（水平制表符）</td>
+<td style="text-align:center">41</td>
+<td>)</td>
+<td style="text-align:center">73</td>
+<td>I</td>
+<td style="text-align:center">105</td>
+<td>i</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td>LF（换行）</td>
+<td style="text-align:center">42</td>
+<td>*</td>
+<td style="text-align:center">74</td>
+<td>J</td>
+<td style="text-align:center">106</td>
+<td>j</td>
+</tr>
+<tr>
+<td style="text-align:center">11</td>
+<td>VT（垂直制表符）</td>
+<td style="text-align:center">43</td>
+<td>+</td>
+<td style="text-align:center">75</td>
+<td>K</td>
+<td style="text-align:center">107</td>
+<td>k</td>
+</tr>
+<tr>
+<td style="text-align:center">12</td>
+<td>FF（换页）</td>
+<td style="text-align:center">44</td>
+<td>,</td>
+<td style="text-align:center">76</td>
+<td>L</td>
+<td style="text-align:center">108</td>
+<td>l</td>
+</tr>
+<tr>
+<td style="text-align:center">13</td>
+<td>CR（回车）</td>
+<td style="text-align:center">45</td>
+<td>-</td>
+<td style="text-align:center">77</td>
+<td>M</td>
+<td style="text-align:center">109</td>
+<td>m</td>
+</tr>
+<tr>
+<td style="text-align:center">14</td>
+<td>SO（Shift out）</td>
+<td style="text-align:center">46</td>
+<td>.</td>
+<td style="text-align:center">78</td>
+<td>N</td>
+<td style="text-align:center">110</td>
+<td>n</td>
+</tr>
+<tr>
+<td style="text-align:center">15</td>
+<td>SI（Shift in）</td>
+<td style="text-align:center">47</td>
+<td>/</td>
+<td style="text-align:center">79</td>
+<td>O</td>
+<td style="text-align:center">111</td>
+<td>o</td>
+</tr>
+<tr>
+<td style="text-align:center">16</td>
+<td>DLE（数据链路转义）</td>
+<td style="text-align:center">48</td>
+<td>0</td>
+<td style="text-align:center">80</td>
+<td>P</td>
+<td style="text-align:center">112</td>
+<td>p</td>
+</tr>
+<tr>
+<td style="text-align:center">17</td>
+<td>DCI（设备控制1）</td>
+<td style="text-align:center">49</td>
+<td>1</td>
+<td style="text-align:center">81</td>
+<td>Q</td>
+<td style="text-align:center">113</td>
+<td>q</td>
+</tr>
+<tr>
+<td style="text-align:center">18</td>
+<td>DC2（设备控制2）</td>
+<td style="text-align:center">50</td>
+<td>2</td>
+<td style="text-align:center">82</td>
+<td>R</td>
+<td style="text-align:center">114</td>
+<td>r</td>
+</tr>
+<tr>
+<td style="text-align:center">19</td>
+<td>DC3（设备控制3）</td>
+<td style="text-align:center">51</td>
+<td>3</td>
+<td style="text-align:center">83</td>
+<td>S</td>
+<td style="text-align:center">115</td>
+<td>s</td>
+</tr>
+<tr>
+<td style="text-align:center">20</td>
+<td>DC4（设备控制4）</td>
+<td style="text-align:center">52</td>
+<td>4</td>
+<td style="text-align:center">84</td>
+<td>T</td>
+<td style="text-align:center">116</td>
+<td>t</td>
+</tr>
+<tr>
+<td style="text-align:center">21</td>
+<td>NAK（否定回应）</td>
+<td style="text-align:center">53</td>
+<td>5</td>
+<td style="text-align:center">85</td>
+<td>U</td>
+<td style="text-align:center">117</td>
+<td>u</td>
+</tr>
+<tr>
+<td style="text-align:center">22</td>
+<td>SYN（同步空闲）</td>
+<td style="text-align:center">54</td>
+<td>6</td>
+<td style="text-align:center">86</td>
+<td>V</td>
+<td style="text-align:center">118</td>
+<td>v</td>
+</tr>
+<tr>
+<td style="text-align:center">23</td>
+<td>ETB（传输块结束）</td>
+<td style="text-align:center">55</td>
+<td>7</td>
+<td style="text-align:center">87</td>
+<td>W</td>
+<td style="text-align:center">119</td>
+<td>w</td>
+</tr>
+<tr>
+<td style="text-align:center">24</td>
+<td>CAN（取消）</td>
+<td style="text-align:center">56</td>
+<td>8</td>
+<td style="text-align:center">88</td>
+<td>X</td>
+<td style="text-align:center">120</td>
+<td>x</td>
+</tr>
+<tr>
+<td style="text-align:center">25</td>
+<td>EM（介质中断）</td>
+<td style="text-align:center">57</td>
+<td>9</td>
+<td style="text-align:center">89</td>
+<td>Y</td>
+<td style="text-align:center">121</td>
+<td>y</td>
+</tr>
+<tr>
+<td style="text-align:center">26</td>
+<td>SUB（替换）</td>
+<td style="text-align:center">58</td>
+<td>:</td>
+<td style="text-align:center">90</td>
+<td>Z</td>
+<td style="text-align:center">122</td>
+<td>z</td>
+</tr>
+<tr>
+<td style="text-align:center">27</td>
+<td>ESC（退出）</td>
+<td style="text-align:center">59</td>
+<td>;</td>
+<td style="text-align:center">91</td>
+<td>[</td>
+<td style="text-align:center">123</td>
+<td>{</td>
+</tr>
+<tr>
+<td style="text-align:center">28</td>
+<td>FS（文件分隔符）</td>
+<td style="text-align:center">60</td>
+<td>&lt;</td>
+<td style="text-align:center">92</td>
+<td>\</td>
+<td style="text-align:center">124</td>
+<td>|</td>
+</tr>
+<tr>
+<td style="text-align:center">29</td>
+<td>GS（群组分隔符）</td>
+<td style="text-align:center">61</td>
+<td>=</td>
+<td style="text-align:center">93</td>
+<td>]</td>
+<td style="text-align:center">125</td>
+<td>}</td>
+</tr>
+<tr>
+<td style="text-align:center">30</td>
+<td>RS（记录分隔符）</td>
+<td style="text-align:center">62</td>
+<td>&gt;</td>
+<td style="text-align:center">94</td>
+<td>^</td>
+<td style="text-align:center">126</td>
+<td>~</td>
+</tr>
+<tr>
+<td style="text-align:center">31</td>
+<td>US（单元分隔符）</td>
+<td style="text-align:center">63</td>
+<td>?</td>
+<td style="text-align:center">95</td>
+<td>_</td>
+<td style="text-align:center">127</td>
+<td>DEL（删除）</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Access数据库引擎安装问题]]></title>
         <id>https://itachijames.github.io//post/AccessDBEngineIssue</id>

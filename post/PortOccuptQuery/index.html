@@ -5,7 +5,7 @@
     
 <meta charset="utf-8" >
 
-<title>Issue | Parsifal Blog</title>
+<title>端口占用 | Parsifal Blog</title>
 <meta name="description" content="曾经沧海难为水">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -72,88 +72,47 @@
 
 
       <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">端口占用</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2019-06-16</span>
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://itachijames.github.io//tag/gCjyabITb">
+                    Skill
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <h1 id="查看端口占用-解决">查看端口占用、解决</h1>
+<ol start="0">
+<li>命令 <code>netstat -ano</code> 可查看所有端口使用情况</li>
+<li>执行 <code>netstat -ano|findstr &quot;xxxx&quot;</code> 输入对应的端口</li>
+<li>找到对应的pid并执行 <code>tasklist|findstr &quot;yyyy&quot;</code> 输入对应的pid</li>
+<li>结束其进程解除占用 <code>taskkill /f /pid &quot;yyyy&quot;</code></li>
+</ol>
 
-        <div class="current-tag-container">
-          <h2 class="title">
-            <i class="icon icon-pricetags-outline"></i> Issue
-          </h2> 
+          </div>
         </div>
 
         
-<section class="post-item">
-    <div class="content">
-      <a href="https://itachijames.github.io//post/CSharpStructNature">
-        <h2 class="post-title">C#中结构体性质</h2>
-      </a>
-      <div class="post-abstract">
-        
+          <div class="next-post">
+            <a class="purple-link" href="https://itachijames.github.io//post/Ascii">
+              <h3 class="post-title">
+                下一篇：ASCII码表
+              </h3>
+            </a>
+          </div>
+          
       </div>
-      <div class="post-info">
-        <span><i class="icon icon-calendar-outline"></i> 2019-06-16</span>
-        
-          <span>
-            <i class="icon icon-pricetags-outline"></i>
-            
-              <a href="https://itachijames.github.io//tag/NVSxtmrBC">
-                .NetCore
-                
-                  ，
-                
-              </a>
-            
-              <a href="https://itachijames.github.io//tag/ku0c2TA60">
-                C#
-                
-                  ，
-                
-              </a>
-            
-              <a href="https://itachijames.github.io//tag/nYk7g7sa1">
-                Issue
-                
-              </a>
-            
-          </span>
-        
-      </div>
-    </div>
-    
-  </section>
 
-<section class="post-item">
-    <div class="content">
-      <a href="https://itachijames.github.io//post/AccessDBEngineIssue">
-        <h2 class="post-title">Access数据库引擎安装问题</h2>
-      </a>
-      <div class="post-abstract">
-        
-      </div>
-      <div class="post-info">
-        <span><i class="icon icon-calendar-outline"></i> 2016-07-14</span>
-        
-          <span>
-            <i class="icon icon-pricetags-outline"></i>
-            
-              <a href="https://itachijames.github.io//tag/nYk7g7sa1">
-                Issue
-                
-              </a>
-            
-          </span>
-        
-      </div>
-    </div>
-    
-  </section>
-
-
-<div class="pagination-container">
-  
-  
-</div>
-
-
-      </div>
+      
 
       <div class="site-footer">
   <div class="slogan">曾经沧海难为水</div>
