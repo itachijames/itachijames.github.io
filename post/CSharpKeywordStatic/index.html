@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560676321171">
+<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560677439960">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://itachijames.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="site-header">
     <div class="left">
       <a href="https://itachijames.github.io/">
-        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560676321171" alt="" width="32px" height="32px">
+        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560677439960" alt="" width="32px" height="32px">
       </a>
       <a href="https://itachijames.github.io/">
         <h1 class="site-title">Parsifal Blog</h1>
@@ -90,15 +90,15 @@
             
           </div>
           <div class="post-content">
-            <h2 id="keyword-static">Keyword: static</h2>
+            <h1 id="keyword-static">Keyword: static</h1>
 <p>对于一个普通的类，若要访问其中的某个方法/属性一般要先为此类生成一个对象，再通过此对象访问方法/属性。为避免这一“麻烦”，可见此方法用<code>static</code>关键字进行修饰，声明成一个<strong>静态成员</strong>。</p>
-<h3 id="静态数据">静态数据</h3>
+<h2 id="静态数据">静态数据</h2>
 <p>对于普通类中的字段数据，类的每一个对象都会生成/维护各自字段数据的独立副本。而若将一个字段定义为静态，则此类型生成的所有对象将共享内存：若某个对象通过某种方式改变了此静态字段的值，那其他所有对象都将受到影响。</p>
 <blockquote>
 <p>静态数据字段由所有对象共享</p>
 </blockquote>
 <p>类中的静态成员（方法）在其实现中引用类中非静态成员将导致编译错误（因为类型的每个对象实例都有独立的非静态成员，你在大家公有的方法中又怎能确保调用的是你自己的非静态成员呢？）。类似的，在静态成员中将<code>this</code>操作符用作指示对象的“this”也将报错。</p>
-<h3 id="静态构造函数">静态构造函数</h3>
+<h2 id="静态构造函数">静态构造函数</h2>
 <p>根据静态数据的特性可知，如果在类的构造函数中对静态数据成员进行初始化工作，那每创建一个新对象时，静态数据的值都将重置，之前所做的更改都将无效。一般设置静态字段是在声明时赋初值，而如果某静态数据的值是在运行时才获取（比如从其他文件中读取某一数据）的，那将如何实现呢？此时应该使用<strong>静态构造函数</strong>，在其中设置静态数据值。
 关于静态构造函数有几点性质：</p>
 <ol>
@@ -108,7 +108,7 @@
 <li>（运行库）创建类的实例或首次访问静态成员前调用静态构造函数</li>
 <li>静态构造函数的执行优先于任何实例级别的构造函数</li>
 </ol>
-<h3 id="静态类">静态类</h3>
+<h2 id="静态类">静态类</h2>
 <p>若用<code>static</code>关键字修饰一个类，则其被声明为<strong>静态类</strong>，其将不能通过<code>new</code>关键字来创建对象实例。一般想要设计一个“工具类”时才会将一个类声明为静态类————我们使用这个类只是为了使用其中的方法/属性，而不需要创建一个具体的对象。
 .NET平台下的<code>system</code>命名空间中常用的静态类（工具类）有：</p>
 <ul>
@@ -122,15 +122,12 @@
 <li><code>Nullable</code> 返回值可为null的值类型</li>
 </ul>
 <p>与<code>static</code>关键字相关的还有<code>const</code>关键字和<code>readonly</code>关键字</p>
-<h2 id="keyword-const">Keyword: const</h2>
-<p>用 <code>const</code> 关键字修饰的数据为<strong>常量数据</strong>，其值在赋初值后永远不变。在类中的常量字段是<strong>隐式静态</strong>的，访问时需加上完全类名前缀。</p>
-<blockquote>
-<p>常量数据必须在编译时确定其值</p>
-</blockquote>
+<h1 id="keyword-const">Keyword: const</h1>
+<p>用 <code>const</code> 关键字修饰的数据为<strong>常量数据</strong>，其值在赋初值后永远不变。在类中的常量字段是<strong>隐式静态</strong>的，访问时需加上完全类名前缀。常量数据必须在编译时确定其值。</p>
 <p>在定义常量数据时必须对其赋初值，其他任何地方，包括构造函数，都不能对之进行写操作（构造函数在运行时才调用）。</p>
-<h2 id="keyword-readonly">Keyword: readonly</h2>
+<h1 id="keyword-readonly">Keyword: readonly</h1>
 <p>与常量数据相似的，用<code>readonly</code>关键字修饰的数据称为<strong>只读数据/字段</strong>，其在定义赋初值后同样不能被修改。但与常量数据不同，其值可在运行时确定，故其可在构造函数内赋初值（当然，其他地方依然不行）。只读字段<strong>不是</strong>隐式静态的。</p>
-<h3 id="静态只读字段">静态只读字段</h3>
+<h2 id="静态只读字段">静态只读字段</h2>
 <p>要将只读字段变为静态只需用<code>static</code>修饰，将其变为<strong>静态只读字段</strong>。静态只读字段将在类级别公开只读字段。在编译时已知静态只读字段，则其使用方式和常量字段相同；如其在运行时才能确定其值，则要用静态构造函数。</p>
 
           </div>

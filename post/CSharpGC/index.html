@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560676321171">
+<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560677439960">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://itachijames.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="site-header">
     <div class="left">
       <a href="https://itachijames.github.io/">
-        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560676321171" alt="" width="32px" height="32px">
+        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560677439960" alt="" width="32px" height="32px">
       </a>
       <a href="https://itachijames.github.io/">
         <h1 class="site-title">Parsifal Blog</h1>
@@ -90,10 +90,10 @@
             
           </div>
           <div class="post-content">
-            <p><code>C#</code>和<code>Java</code>一样是一款自带了垃圾回收功能的语言，在编程时不需时刻考虑对已分配对象的内存进行回收，而如<code>C++</code>这样没有垃圾回收功能的语言则需考虑对象是否已不可调用，要用<code>delete</code>关键字回收其内存。来讲讲C#中内存回收的一些要点。</p>
-<h2 id="前提">前提</h2>
+            <p><code>C#</code>和<code>Java</code>一样是一款自带了垃圾回收功能的语言，在编程时不需时刻考虑对已分配对象的内存进行回收，而如<code>C++</code>这样没有垃圾回收功能的语言则需考虑对象是否已不可调用，要用<code>delete</code>关键字回收其内存。</p>
+<h1 id="前提">前提</h1>
 <p>讲垃圾回收前需要明白的是<strong>对象</strong>与<strong>引用</strong>之间的关系。我们在定义一个类（当然不是抽象类）之后，C#用<code>new</code>关键字来分配任意数量的对象，注意：<code>new</code>关键字返回的是一个“<strong>堆</strong>”上的引用，而不是真正<strong>对象本身</strong>，这个引用保存在<strong>栈</strong>内。垃圾回收是清除堆上的空间（包括压缩空的内存块）。在面向对象程序中需要用到很多对象，在C#中还分为<strong>值类型</strong>和<strong>引用类型</strong>，这些对象往往在一个函数中，而当程序调用完此函数且不再调用此函数时，函数里调用时分配的对象便不再有意义，而它又占用部分内存空间，此时就需要对其占用的空间进行回收，被称为垃圾回收（当然垃圾回收并不局限于函数调用里对象占用的空间，还包括其他很多情况所占用的空间）。</p>
-<h2 id="generation">generation</h2>
+<h1 id="generation">generation</h1>
 <p>C#用<strong>generation</strong>（代）对对象进行分类（其实可以理解为一种标识），在.NET4.0后对象一般可分为3代（0代，1代，2代），将0代和1代合称为ephemeral generation（暂时代）。</p>
 <ul>
 <li>0代：从未被标记且将要回收的（新分配的）对象</li>
@@ -103,7 +103,7 @@
 <p>垃圾回收器回收时首先检查所有第0代对象，标志这些对象且清理后若得到足够的空闲内存，任何没有被回收的对象则被升至1代；若仍需更多内存，则检查1代对象的“可访问性”并进行回收，没有被回收的1代对象则被升至2代。（这其中还涉及到一个应用程序根“application root”的概念，就不深入研究了）</p>
 <p>.NET4.0之前进行垃圾回收时，对于暂时代的回收，会暂时挂起当前进程中所有活动线程，以确保垃圾回收中不会访问堆，通俗地将就是垃圾回收时会暂停程序以进行垃圾回收；通过专门的线程清理不在暂时代的对象，此时允许程序继续分配堆上的对象。</p>
 <p>.NET4.0后，对于暂时代上的对象，将使用一个<strong>专用后台线程</strong>进行回收，非暂时代的对象使用<strong>后台垃圾回收</strong>。这种改进无疑将提升程序的性能，但需要指出的是垃圾回收本来就可以在无任何人工干预（编程实现）下执行其工作，这种改进对编程人员不是透明的，也无需更多了解。</p>
-<h2 id="systemgc">System.GC</h2>
+<h1 id="systemgc">System.GC</h1>
 <p>垃圾回收无需人为进行干预，但某些情况下可能会需要手动编程以使用垃圾回收：程序即将运行的代码不希望被垃圾回收中断；程序突然分配了很多对象，希望尽可能多的删除已获得的内存。垃圾回收的相关类主要是在mscorlib.dll中的System.GC类。此类中的函数较少，功能也很明确，就不详细说明，值得注意的有以下几点</p>
 <ol>
 <li>

@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560676321171">
+<link rel="shortcut icon" href="https://itachijames.github.io//favicon.ico?v=1560677439960">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://itachijames.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="site-header">
     <div class="left">
       <a href="https://itachijames.github.io/">
-        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560676321171" alt="" width="32px" height="32px">
+        <img class="avatar" src="https://itachijames.github.io//images/avatar.png?v=1560677439960" alt="" width="32px" height="32px">
       </a>
       <a href="https://itachijames.github.io/">
         <h1 class="site-title">Parsifal Blog</h1>
@@ -112,7 +112,7 @@
 <li>结构体的分配的内存大小与各字段的类型字节相关</li>
 </ul>
 <p>现举例说明，测试环境以Win10 *64 + .NetCore 2.1.403 + VS2017为测试环境，测量对象大小采用<code>Marshal.SizeOf(var)</code> ，测量类型大小采用<code>sizeof(type)</code>。</p>
-<h3 id="基本类型分配内存大小">基本类型分配内存大小</h3>
+<h2 id="基本类型分配内存大小">基本类型分配内存大小</h2>
 <pre><code class="language-C#">var a = sizeof(byte);//1
 var b = sizeof(char);//2
 var c = sizeof(int);//4
@@ -121,7 +121,7 @@ var e = sizeof(long);//8
 var f = sizeof(double);//8
 var g = sizeof(decimal);//16
 </code></pre>
-<h3 id="结构体大小">结构体大小</h3>
+<h2 id="结构体大小">结构体大小</h2>
 <pre><code class="language-C#">using System;
 using System.Runtime.InteropServices;
 public struct StructTest1
@@ -136,7 +136,7 @@ public struct StructTest2
     public double B;
     public byte C;
 }
-public struct StructTestAPI
+public struct ReceiveStruct
 {
     int X;
     char Y[8];
@@ -168,9 +168,9 @@ StructTest4 st4 = new StructTest4();
 <p>由s1的大小可知结构体的大小并不是简单的将各个字段相加后的大小（1+4+8=13≠16）。这涉及到.Net在处理结构体时对其进行了特殊处理：结构体为值类型，存在栈上，为了避免多次访问栈，.Net对结构体进行了一个对齐操作——<em>如果某个字段的长度大于或等于对齐长度，则对齐无用；如果小于对齐长度，则以对齐长度为单元，占用的空间是对齐长度的整数倍，同时保证不大于对齐长度的字段一定分配在同一单元，并且其首地址一定是字段长度的整数倍</em>。若没有显式指定对齐长度，将以结构中占用空间<strong>最大成员的长度</strong>作为对齐长度。</p>
 <p>根据对齐操作的说明，可知s1的内存分配情况为：第0个字节为字段A；第1-3个字节对齐操作自动补上的空字节，为无意义字节；第4-7个字节为字段B；第8-15个字节为字段C。</p>
 <p>由s2与s1的对比可知结构体字段间的排序对整个结构体大小有影响。根据<strong>结构体分配在栈上的连续空间</strong>特点，并结合对齐操作，易知s2的内存分配情况为：第0-3字节为字段A；第4-7字节为补齐字节；第8-15为字段B；第16个字节为字段C；第18-23为补齐字节。</p>
-<p>st3与st4的例子是在对接其他项目时遇到的一个问题示例。对方C++库的方法定义的结构体并没有遵循将<strong>大字节的字段放前面</strong>的原则，对方发过来的数据结构形如<code>StructTestAPI</code>，在其C++程序中为36字节的变量。当我用<code>StructTest3</code>去接数据时，生成的结构体为一40字节（4+4+8+8*3）的对象，int变量A和double数组C接收正常，但long类型的B就错误：经.Net对齐操作后源数据会在<code>StructTestAPI.Y</code> 的内存后添加4个补齐字节，用<code>StructTest3</code>去接时，long类型的B字段会接到源char数组的后四位及4个补齐字节，自然不正确了。</p>
-<p>当换用<code>StructTest4</code>去接数据时就正常了，它不会接到4个补齐字节。注意：这里B用的是<code>byte[]</code>而非<code>char[]</code>，是因为C++中char为1个字节而C#中char为2个字节。其实<code>StructTest4</code>里将B的<code>SizeConst</code>设置为12时，程序也能正常接到数据不会报错、异常，观察内存就可以知道其将4个补齐字节也接到了。</p>
-<h3 id="特例">特例</h3>
+<p>st3与st4的例子是在对接其他项目时遇到的一个问题示例。对方C++库的方法定义的结构体并没有遵循将<strong>大字节的字段放前面</strong>的原则，发过来的数据结构形如<code>ReceiveStruct</code>，在C++程序中为36字节的变量。当用<code>StructTest3</code>去接数据时，生成的结构体为一40字节（4+4+8+8*3）的对象，int变量A和double数组C接收正常，但long类型的B就错误：经.Net对齐操作后源数据会在<code>StructTestAPI.Y</code> 的内存后添加4个补齐字节，用<code>StructTest3</code>去接时，long类型的B字段会接到源char数组的后四位及4个补齐字节，自然不正确了。</p>
+<p>当换用<code>StructTest4</code>去接数据时就正常了，它不会接到4个补齐字节。注意：这里B用的是<code>byte[]</code>而非<code>char[]</code> (C++中char为1个字节而C#中char为2个字节)。其实<code>StructTest4</code>里将B的<code>SizeConst</code>设置为12时，程序也能正常接到数据不会报错、异常，观察内存就可以知道其将4个补齐字节也接到了。</p>
+<h2 id="特例">特例</h2>
 <p>结构体对齐操作的最大成员长度的原则对<code>decimal</code>类型并不适用。</p>
 <pre><code class="language-C#">public struct StructTest5
 {

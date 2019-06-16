@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://itachijames.github.io/</id>
     <title>Parsifal Blog</title>
-    <updated>2019-06-16T09:12:14.260Z</updated>
+    <updated>2019-06-16T09:30:43.339Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://itachijames.github.io/"/>
     <link rel="self" href="https://itachijames.github.io//atom.xml"/>
@@ -24,7 +24,7 @@
 <li>结构体的分配的内存大小与各字段的类型字节相关</li>
 </ul>
 <p>现举例说明，测试环境以Win10 *64 + .NetCore 2.1.403 + VS2017为测试环境，测量对象大小采用<code>Marshal.SizeOf(var)</code> ，测量类型大小采用<code>sizeof(type)</code>。</p>
-<h3 id="基本类型分配内存大小">基本类型分配内存大小</h3>
+<h2 id="基本类型分配内存大小">基本类型分配内存大小</h2>
 <pre><code class="language-C#">var a = sizeof(byte);//1
 var b = sizeof(char);//2
 var c = sizeof(int);//4
@@ -33,7 +33,7 @@ var e = sizeof(long);//8
 var f = sizeof(double);//8
 var g = sizeof(decimal);//16
 </code></pre>
-<h3 id="结构体大小">结构体大小</h3>
+<h2 id="结构体大小">结构体大小</h2>
 <pre><code class="language-C#">using System;
 using System.Runtime.InteropServices;
 public struct StructTest1
@@ -48,7 +48,7 @@ public struct StructTest2
     public double B;
     public byte C;
 }
-public struct StructTestAPI
+public struct ReceiveStruct
 {
     int X;
     char Y[8];
@@ -80,9 +80,9 @@ StructTest4 st4 = new StructTest4();
 <p>由s1的大小可知结构体的大小并不是简单的将各个字段相加后的大小（1+4+8=13≠16）。这涉及到.Net在处理结构体时对其进行了特殊处理：结构体为值类型，存在栈上，为了避免多次访问栈，.Net对结构体进行了一个对齐操作——<em>如果某个字段的长度大于或等于对齐长度，则对齐无用；如果小于对齐长度，则以对齐长度为单元，占用的空间是对齐长度的整数倍，同时保证不大于对齐长度的字段一定分配在同一单元，并且其首地址一定是字段长度的整数倍</em>。若没有显式指定对齐长度，将以结构中占用空间<strong>最大成员的长度</strong>作为对齐长度。</p>
 <p>根据对齐操作的说明，可知s1的内存分配情况为：第0个字节为字段A；第1-3个字节对齐操作自动补上的空字节，为无意义字节；第4-7个字节为字段B；第8-15个字节为字段C。</p>
 <p>由s2与s1的对比可知结构体字段间的排序对整个结构体大小有影响。根据<strong>结构体分配在栈上的连续空间</strong>特点，并结合对齐操作，易知s2的内存分配情况为：第0-3字节为字段A；第4-7字节为补齐字节；第8-15为字段B；第16个字节为字段C；第18-23为补齐字节。</p>
-<p>st3与st4的例子是在对接其他项目时遇到的一个问题示例。对方C++库的方法定义的结构体并没有遵循将<strong>大字节的字段放前面</strong>的原则，对方发过来的数据结构形如<code>StructTestAPI</code>，在其C++程序中为36字节的变量。当我用<code>StructTest3</code>去接数据时，生成的结构体为一40字节（4+4+8+8*3）的对象，int变量A和double数组C接收正常，但long类型的B就错误：经.Net对齐操作后源数据会在<code>StructTestAPI.Y</code> 的内存后添加4个补齐字节，用<code>StructTest3</code>去接时，long类型的B字段会接到源char数组的后四位及4个补齐字节，自然不正确了。</p>
-<p>当换用<code>StructTest4</code>去接数据时就正常了，它不会接到4个补齐字节。注意：这里B用的是<code>byte[]</code>而非<code>char[]</code>，是因为C++中char为1个字节而C#中char为2个字节。其实<code>StructTest4</code>里将B的<code>SizeConst</code>设置为12时，程序也能正常接到数据不会报错、异常，观察内存就可以知道其将4个补齐字节也接到了。</p>
-<h3 id="特例">特例</h3>
+<p>st3与st4的例子是在对接其他项目时遇到的一个问题示例。对方C++库的方法定义的结构体并没有遵循将<strong>大字节的字段放前面</strong>的原则，发过来的数据结构形如<code>ReceiveStruct</code>，在C++程序中为36字节的变量。当用<code>StructTest3</code>去接数据时，生成的结构体为一40字节（4+4+8+8*3）的对象，int变量A和double数组C接收正常，但long类型的B就错误：经.Net对齐操作后源数据会在<code>StructTestAPI.Y</code> 的内存后添加4个补齐字节，用<code>StructTest3</code>去接时，long类型的B字段会接到源char数组的后四位及4个补齐字节，自然不正确了。</p>
+<p>当换用<code>StructTest4</code>去接数据时就正常了，它不会接到4个补齐字节。注意：这里B用的是<code>byte[]</code>而非<code>char[]</code> (C++中char为1个字节而C#中char为2个字节)。其实<code>StructTest4</code>里将B的<code>SizeConst</code>设置为12时，程序也能正常接到数据不会报错、异常，观察内存就可以知道其将4个补齐字节也接到了。</p>
+<h2 id="特例">特例</h2>
 <p>结构体对齐操作的最大成员长度的原则对<code>decimal</code>类型并不适用。</p>
 <pre><code class="language-C#">public struct StructTest5
 {
@@ -485,30 +485,26 @@ var s5 = Marshal.SizeOf(st5);//32
         <link href="https://itachijames.github.io//post/RegularExpression">
         </link>
         <updated>2016-06-23T03:20:42.000Z</updated>
-        <summary type="html"><![CDATA[<p>之前做的一个项目里牵涉到很多数学计算，后台计算无非就是写函数实现公式，而经常出错地方的是由于输入不规范导致没法计算，这就牵扯到对于输入验证了，输入验证最简单的方式就是验证控件验证了，这就需要了解正则表达式（这篇文章写得累死了，正则表达式里很多字符和Markdown重叠啊，一不小心就被MD转义了！）</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>之前做的一个项目里牵涉到很多数学计算，后台计算无非就是写函数实现公式，而经常出错地方的是由于输入不规范导致没法计算，这就牵扯到对于输入验证了，输入验证最简单的方式就是验证控件验证了，这就需要了解正则表达式（这篇文章写得累死了，正则表达式里很多字符和Markdown重叠啊，一不小心就被MD转义了！）</p>
-<!-- more -->
-<h2 id="基础">基础</h2>
-<h3 id="行定位符">行定位符</h3>
+        <content type="html"><![CDATA[<h1 id="基础">基础</h1>
+<h2 id="行定位符">行定位符</h2>
 <p><code>^</code>表示行的开始，<code>$</code>表示行的结尾</p>
 <p>例：<code>^a</code>表示以字母a开头的字符串，<code>b$</code>表示以字母b结尾的字符串</p>
-<h3 id="单词定界符">单词定界符</h3>
+<h2 id="单词定界符">单词定界符</h2>
 <p><code>\b</code>表示匹配一个完整的词，<code>\B</code>则匹配不是完整的词，而是一部分</p>
 <p>例：<code>\btm\b</code>表示匹配一个完整的单词“tm”，而<code>\Btm\B</code>则匹配任何出现“tm”的地方，如“html”</p>
-<h3 id="字符类">字符类</h3>
+<h2 id="字符类">字符类</h2>
 <p><code>[]</code>匹配任何出现在括号内的字符，注意：一个方括号只能匹配一个字符</p>
 <p>例：<code>[Aa]</code>表示匹配字母a,不区分大小写</p>
-<h3 id="选择字符">选择字符</h3>
+<h2 id="选择字符">选择字符</h2>
 <p><code>|</code>表示“或”，注意：<code>|</code>可以匹配任意长度字符</p>
 <p>例：<code>(a|A)</code>匹配字母a，不区分大小写</p>
-<h3 id="连字符">连字符</h3>
+<h2 id="连字符">连字符</h2>
 <p><code>-</code>可见逻辑上相连的字符一起表示</p>
 <p>例：<code>[a-zA-Z]</code>表示匹配所有字母，不区分大小写</p>
-<h3 id="排除字符">排除字符</h3>
+<h2 id="排除字符">排除字符</h2>
 <p><code>^</code>表示排除某字符</p>
 <p>例：<code>[^a-z]</code>表示不以字母和下划线开头的字符</p>
-<h3 id="限定符">限定符</h3>
+<h2 id="限定符">限定符</h2>
 <table>
 <thead>
 <tr>
@@ -543,10 +539,10 @@ var s5 = Marshal.SizeOf(st5);//32
 </tr>
 </tbody>
 </table>
-<h3 id="点字符">点字符</h3>
+<h2 id="点字符">点字符</h2>
 <p><code>.</code>可匹配除换行符外任意一个字符</p>
 <p>例：<code>^s.t$</code>可匹配任意以s开头、t结尾、中间只有一个字母的单词，如sit,set</p>
-<h3 id="转义字符">转义字符</h3>
+<h2 id="转义字符">转义字符</h2>
 <p><code>\</code>和大多语言一样，为了将特殊字符转义为普通字符。除此之外还可以显示不可打印字符、指定预定义字符集和定义断言，如下所示：</p>
 <table>
 <thead>
@@ -646,13 +642,13 @@ var s5 = Marshal.SizeOf(st5);//32
 </tr>
 </tbody>
 </table>
-<h3 id="括号字符">括号字符</h3>
+<h2 id="括号字符">括号字符</h2>
 <p><code>()</code>可改变限定符的作用范围，也可对表达式进行分组</p>
-<h2 id="数字">数字</h2>
+<h1 id="数字">数字</h1>
 <table width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>释义</th><th>表达式</th></tr><tr><td>数字</td><td>^[0-9]\*$</td></tr><tr><td>整数</td><td>^-?[1-9]\d\*$</td></tr><tr><td>正整数</td><td>^[1-9]\d\*$</td></tr><tr><td>负整数</td><td>^-[1-9]\d\*$</td></tr><tr><td>非负整数</td><td>^[1-9]\d\*|0$</td></tr><tr><td>非正整数</td><td>^-[1-9]\d\*|0$</td></tr><tr><td>n位数字</td><td>^\d{n}$</td></tr><tr><td>至少n位的数字</td><td>^\d{n,}$</td></tr><tr><td>m位到n位的数字</td><td>^\d{m,n}$</td></tr><tr><td>非零开头且最多两位小数的数字</td><td>^([1-9][0-9]\*)+(.[0-9]{1,2})?$</td></tr><tr><td>实数（不包括0）</td><td>^(\-|\+)?\d+(\.\d+)?$</td></tr><tr><td>正浮点数</td><td>^[1-9]\d\*\\.\d\*|0\\.\d\*[1-9]\d\*$</td></tr><tr><td>负浮点数</td><td>^-([1-9]\d\*\\.\d\*|0\\.\d\*[1-9]\d\*)$</td></tr><tr><td>浮点数</td><td>^(-?\d+)(\.\d+)?$ 或 ^-?([1-9]\d\*\.\d\*|0\.\d\*[1-9]\d\*|0?\.0+|0)$</td></tr></tbody></table>
-<h2 id="字符">字符</h2>
+<h1 id="字符">字符</h1>
 <table width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>释义</th><th>表达式</th></tr><tr><td>英文和数字</td><td>^[A-Za-z0-9]+$ 或 ^[A-Za-z0-9]{4,40}$</td></tr><tr><td>数字和2英文字母的字符串</td><td>^[A-Za-z0-9]+$</td></tr><tr><td>中文、英文、数字、下划线</td><td>^[\u4E00-\u9FA5A-Za-z0-9_]+$</td></tr><tr><td>可以输入含有^%&’,;=?$\”等字符</td><td>[^%&',;=?$\x22]+</td></tr></tbody></table>
-<h2 id="常用">常用</h2>
+<h1 id="常用">常用</h1>
 <table width="100%" rules="all" cellpadding="10" align="center"><tbody><tr><th>释义</th><th>表达式</th></tr><tr><td>18位身份证</td><td>^(\d{6})(\d{4})(\d{2})(\d{2})(\d{3})([0-9]|X)$</td></tr><tr><td>日期格式（严格匹配：年-月-日）</td><td>([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8])))</td></tr><tr><td>我国邮编</td><td>[1-9]\d{5}(?!\d)</td></tr><tr><td>国内电话号码</td><td>\d{3}-\d{8}|\d{4}-\{7,8}</td></tr><tr><td>网址匹配</td><td>[a-zA-z]+://[^\s]\*</td></tr><tr><td>邮箱匹配</td><td>^\w+([-+.]\w+)\*@\w+([-.]\w+)\*\.\w+([-.]\w+)\*$ 或 [\w!#$%&'\*+/=?^\_\`{|}~-]+(?:\.[\w!#$%&'\*+/=?^\_\`{|}~-]+)\*@(?:[\w]\(?:[\w-]\*[\w])?\.)+[\w]\(?:[\w-]\*[\w])?</td></tr><tr><td>中文字符</td><td>[\u4e00-\u9fa5]</td></tr><tr><td>密码(以字母开头，长度在6~18之间，只能包含字母、数字和下划线)</td><td>^[a-zA-Z]\w{5,17}$</td></tr><tr><td>强密码(必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-10之间)</td><td>^(?=.\*\d)(?=.\*[a-z])(?=.\*[A-Z]).{8,10}$</td></tr><tr><td>IP</td><td>\d+\.\d+\.\d+\.\d+</td></tr><tr><td>强IP匹配</td><td>((?:(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d))</td></tr></tbody></table>
 ]]></content>
     </entry>
@@ -662,10 +658,10 @@ var s5 = Marshal.SizeOf(st5);//32
         <link href="https://itachijames.github.io//post/CSharpGC">
         </link>
         <updated>2016-06-22T01:35:07.000Z</updated>
-        <content type="html"><![CDATA[<p><code>C#</code>和<code>Java</code>一样是一款自带了垃圾回收功能的语言，在编程时不需时刻考虑对已分配对象的内存进行回收，而如<code>C++</code>这样没有垃圾回收功能的语言则需考虑对象是否已不可调用，要用<code>delete</code>关键字回收其内存。来讲讲C#中内存回收的一些要点。</p>
-<h2 id="前提">前提</h2>
+        <content type="html"><![CDATA[<p><code>C#</code>和<code>Java</code>一样是一款自带了垃圾回收功能的语言，在编程时不需时刻考虑对已分配对象的内存进行回收，而如<code>C++</code>这样没有垃圾回收功能的语言则需考虑对象是否已不可调用，要用<code>delete</code>关键字回收其内存。</p>
+<h1 id="前提">前提</h1>
 <p>讲垃圾回收前需要明白的是<strong>对象</strong>与<strong>引用</strong>之间的关系。我们在定义一个类（当然不是抽象类）之后，C#用<code>new</code>关键字来分配任意数量的对象，注意：<code>new</code>关键字返回的是一个“<strong>堆</strong>”上的引用，而不是真正<strong>对象本身</strong>，这个引用保存在<strong>栈</strong>内。垃圾回收是清除堆上的空间（包括压缩空的内存块）。在面向对象程序中需要用到很多对象，在C#中还分为<strong>值类型</strong>和<strong>引用类型</strong>，这些对象往往在一个函数中，而当程序调用完此函数且不再调用此函数时，函数里调用时分配的对象便不再有意义，而它又占用部分内存空间，此时就需要对其占用的空间进行回收，被称为垃圾回收（当然垃圾回收并不局限于函数调用里对象占用的空间，还包括其他很多情况所占用的空间）。</p>
-<h2 id="generation">generation</h2>
+<h1 id="generation">generation</h1>
 <p>C#用<strong>generation</strong>（代）对对象进行分类（其实可以理解为一种标识），在.NET4.0后对象一般可分为3代（0代，1代，2代），将0代和1代合称为ephemeral generation（暂时代）。</p>
 <ul>
 <li>0代：从未被标记且将要回收的（新分配的）对象</li>
@@ -675,7 +671,7 @@ var s5 = Marshal.SizeOf(st5);//32
 <p>垃圾回收器回收时首先检查所有第0代对象，标志这些对象且清理后若得到足够的空闲内存，任何没有被回收的对象则被升至1代；若仍需更多内存，则检查1代对象的“可访问性”并进行回收，没有被回收的1代对象则被升至2代。（这其中还涉及到一个应用程序根“application root”的概念，就不深入研究了）</p>
 <p>.NET4.0之前进行垃圾回收时，对于暂时代的回收，会暂时挂起当前进程中所有活动线程，以确保垃圾回收中不会访问堆，通俗地将就是垃圾回收时会暂停程序以进行垃圾回收；通过专门的线程清理不在暂时代的对象，此时允许程序继续分配堆上的对象。</p>
 <p>.NET4.0后，对于暂时代上的对象，将使用一个<strong>专用后台线程</strong>进行回收，非暂时代的对象使用<strong>后台垃圾回收</strong>。这种改进无疑将提升程序的性能，但需要指出的是垃圾回收本来就可以在无任何人工干预（编程实现）下执行其工作，这种改进对编程人员不是透明的，也无需更多了解。</p>
-<h2 id="systemgc">System.GC</h2>
+<h1 id="systemgc">System.GC</h1>
 <p>垃圾回收无需人为进行干预，但某些情况下可能会需要手动编程以使用垃圾回收：程序即将运行的代码不希望被垃圾回收中断；程序突然分配了很多对象，希望尽可能多的删除已获得的内存。垃圾回收的相关类主要是在mscorlib.dll中的System.GC类。此类中的函数较少，功能也很明确，就不详细说明，值得注意的有以下几点</p>
 <ol>
 <li>
@@ -726,24 +722,24 @@ var s5 = Marshal.SizeOf(st5);//32
         </link>
         <updated>2016-04-22T08:28:40.000Z</updated>
         <content type="html"><![CDATA[<p>刚上大学那会看新闻都是从新浪、网易这种门户网站获取资讯的（还有在人人网的人人小站里，估计这东西现在都没几个人用了），没事的时候进入网站，点了一个连接，看完一条新闻后往往又会点页面下方相关新闻和最近其他新闻，这样一搞时间不知不觉地从指间溜走。后来读了研后觉得这样浪费时间，实在没效率，就开始用RSS开始读新闻了，自己订阅想看的网站，专注看新闻。前前后后试用了十多款RSS订阅服务，就来比较一下各自的差异，主要比较的是各RSS的Web服务及其<strong>iOS客户端</strong>体验。</p>
-<h2 id="inoreader"><a href="http://www.inoreader.com/">Inoreader</a></h2>
+<h1 id="inoreader"><a href="http://www.inoreader.com/">Inoreader</a></h1>
 <p>国外的一款服务，功能丰富，在体验了这么多款服务后觉得这家做得最好、最值得推荐。Web网页文章打开很快，网站可设置只为中文，自定义功能选项十分多，网页略有广告，不过可以使用浏览器插件屏蔽。订阅源抓取速度很快，也可自行加强订阅源获取周期，不过免费用户有加强数目限制。</p>
 <p>iOS客户端仍在更新，其界面和其他服务的客户端相比十分简洁，并且没有推荐、热点（使用RSS不就是想只看点自己订阅的东西吗？还用得着你给我推荐东西给我看，那样用RSS的意义又何在？），对订阅文章的操作主要有加星标、保存页面和加标签，加上订阅正好构成了App底栏的4个TabBar；应用设计的很简洁，交互逻辑很清楚，操作十分流畅。刷新订阅列表时显示每个订阅的未读条目，连接情况良好，每次刷新列表都会重新抓取，但有时点击某个订阅进入其文章列表时会显示网络故障“请求超时”，显示不了任何文章，这大概是Inoreader这款服务在我眼里唯一的缺点了。应用不会占据很大储存空间，可能是会定期删掉早期的文章缓存。</p>
-<h2 id="feedly"><a href="http://feedly.com/">Feedly</a></h2>
+<h1 id="feedly"><a href="http://feedly.com/">Feedly</a></h1>
 <p>Google Reader死后很多人在用的代替品，很多RSS服务都支持Feedly。网站经常打不开，有时要刷新几遍才能打开，被墙的厉害，可设置项不如Inoreader多。iOS客户端设计的还是挺漂亮，但交互体验很差，或是根本不能理解其逻辑，一会是订阅的一篇文章占据整个页面，一滑又转到文章列表，逻辑十分混乱。文章列表显示预览时总是不能显示文章里的图片，但又留了个纯白图片的区域在那；经常刷新不了文章列表，有时在wifi下显示网络错误但切换成移动网络又可以刷新。</p>
-<h2 id="newsblur"><a href="http://www.newsblur.com/">NewsBlur</a></h2>
+<h1 id="newsblur"><a href="http://www.newsblur.com/">NewsBlur</a></h1>
 <p>一款国内比较少人使用的RSS服务，Web端设计的比较“缺少设计美感”，阅读页面被拆分为左中右三块，分别为订阅列表、文章列表、文章详情，可设置的内容较丰富，升级账号的费用要24刀，比其他的都要贵些。iOS端设计延续了Web端的丑，但其网络环境是所有国外服务中最好的，基本没出现过任何情况（这也是增加好感的重要一点）；滑动操作有时会很卡，手指大幅滑动却只滑动一点，估计是文章在加载（想念Inoreader的丝滑流畅）；应用可以设置四种主题。免费帐户最多只能订阅64个网站，不过对于一般用户也够了。</p>
-<h2 id="digg"><a href="http://digg.com/reader">Digg</a></h2>
+<h1 id="digg"><a href="http://digg.com/reader">Digg</a></h1>
 <p>Digg其实是一款新闻资讯网站，不过在GR死后说要继承其衣钵，又增加了RSS服务，Web端没什么特别的优点，可设置的选项很少；订阅源抓取速度不够快（我有个订阅源，只抓到半年前的文章，不知道什么原因）。iOS客户端进去时还是个资讯客户端，可以看新闻（都是英文的啦），需要登录账号后应用才显示底部订阅TabBar。应用大量使用白底（和Feedly一样），是很好看但有些晃眼；网络连接情况没有Inoreader快，但比Feedly好。</p>
-<h2 id="aol-reader"><a href="http://reader.aol.com/">Aol Reader</a></h2>
+<h1 id="aol-reader"><a href="http://reader.aol.com/">Aol Reader</a></h1>
 <p>一款国外的RSS服务，Web端做的挺漂亮，可设置为中文界面。iOS客户端功能设计简洁，不过有时根本连接不到服务器，让我没有继续使用的耐性。</p>
-<h2 id="the-old-reader"><a href="https://theoldreader.com/">The Old Reader</a></h2>
+<h1 id="the-old-reader"><a href="https://theoldreader.com/">The Old Reader</a></h1>
 <p>国外的一款还不错的服务，网页风格和GR类似，可设为中文，各项功能齐全，页面漂亮简介，可惜的是没有iOS客户端，只能通过第三方的应用查看订阅。</p>
-<h2 id="一览"><a href="http://yilan.io/">一览</a></h2>
+<h1 id="一览"><a href="http://yilan.io/">一览</a></h1>
 <p>这个并不是豌豆荚一览，它就叫“一览”。所有国内的RSS服务的优点都是网络环境，缺点都是自作主张的有热门推荐之类的功能。一览整合了国内的资讯服务，只需通过资讯名查找订阅而不需要XML，一些无法通过Feed订阅的如微博或是lofter博客都可以订阅。值得吐槽的是它Web端logo旁显示的依然是Beta，公测要这么久？！iOS客户端设计的还行，有一些好的功能，比如可根据时间自动切换主题；不过也有鸡肋功能，比如语音播放文章（真的有人要用到这个？竟然还把按钮直接放在文章上部中间位置，搞得连点击时间返回顶部的系统功能都不好用了），不过让我弃用它的真正原因是设置中删除缓存功能，阅读文章自然会产生缓存，而官方应用的删除缓存没有任何作用，每次点击时不仅没有任何反馈，而且根本没有真正删除缓存，进入“系统储存空间”一看还是占据那么多空间，用了一段时间后占着将近1G多的空间啊！感情删除缓存的按钮只有个安慰作用！</p>
-<h2 id="深蓝阅读">深蓝阅读</h2>
+<h1 id="深蓝阅读">深蓝阅读</h1>
 <p>很烂的服务，iOS端竟然有整屏的第三方广告，简直不能忍，试用了一会马上删除，并没有什么好讲的。</p>
-<h2 id="zakerflipboard">ZAKER/Flipboard</h2>
+<h1 id="zakerflipboard">ZAKER/Flipboard</h1>
 <p>这两个是第三方的新闻聚合应用，可以在其中自由订阅想看的新闻，可以说是种间接的RSS。一开始使用的是Flipboard，因为当时是用的三星，而三星直接将其整合到Touchwiz中，使用了一段时间发现其中的新闻源和我口味似乎没有那么贴切，再后来又发现这货竟然是中国特版的，就弃用了——最讨厌被差别对待了好吗！印象笔记也是这么弃用的。后来用了ZAKER，毕竟是国内公司做的，里面的新闻要更合我意。经常在Wifi下打开新闻，断网后看缓存，导致应用经常占据几百兆的空间，不过这并不是什么大问题。后来发现这样看新闻还是浪费时间，推荐的新闻就在首页，没有强烈的意思要去看但还是点了进去；再加上应用时不时的广告也就弃用了，坚定的转移到RSS阵营。</p>
 <p>除了这些外还试用一些其他服务，体验了一些iOS客户端和第三方客户端，如BazQux、Unread、feeder.co（付费）、Feeddler RSS Reader、Feed Wrangler（付费）、Newsify、Feedoo等，没有使用有很多的因素。通过对比发现国内国外的服务，发现还是有很大的差异：国外的专注做RSS服务，网站的中心就是用户订阅列表，提供大量设置选项；而国内服务则侧重资讯的整合，RSS相关的设置、功能不够丰富。</p>
 <p>总结来说本人认为现在最好的订阅服务是Inoreader，其客户端也还不错，推荐使用；此外NewsBlur和一览都是不错的选择。</p>
@@ -755,15 +751,15 @@ var s5 = Marshal.SizeOf(st5);//32
         <link href="https://itachijames.github.io//post/CSharpKeywordStatic">
         </link>
         <updated>2016-04-18T13:27:29.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="keyword-static">Keyword: static</h2>
+        <content type="html"><![CDATA[<h1 id="keyword-static">Keyword: static</h1>
 <p>对于一个普通的类，若要访问其中的某个方法/属性一般要先为此类生成一个对象，再通过此对象访问方法/属性。为避免这一“麻烦”，可见此方法用<code>static</code>关键字进行修饰，声明成一个<strong>静态成员</strong>。</p>
-<h3 id="静态数据">静态数据</h3>
+<h2 id="静态数据">静态数据</h2>
 <p>对于普通类中的字段数据，类的每一个对象都会生成/维护各自字段数据的独立副本。而若将一个字段定义为静态，则此类型生成的所有对象将共享内存：若某个对象通过某种方式改变了此静态字段的值，那其他所有对象都将受到影响。</p>
 <blockquote>
 <p>静态数据字段由所有对象共享</p>
 </blockquote>
 <p>类中的静态成员（方法）在其实现中引用类中非静态成员将导致编译错误（因为类型的每个对象实例都有独立的非静态成员，你在大家公有的方法中又怎能确保调用的是你自己的非静态成员呢？）。类似的，在静态成员中将<code>this</code>操作符用作指示对象的“this”也将报错。</p>
-<h3 id="静态构造函数">静态构造函数</h3>
+<h2 id="静态构造函数">静态构造函数</h2>
 <p>根据静态数据的特性可知，如果在类的构造函数中对静态数据成员进行初始化工作，那每创建一个新对象时，静态数据的值都将重置，之前所做的更改都将无效。一般设置静态字段是在声明时赋初值，而如果某静态数据的值是在运行时才获取（比如从其他文件中读取某一数据）的，那将如何实现呢？此时应该使用<strong>静态构造函数</strong>，在其中设置静态数据值。
 关于静态构造函数有几点性质：</p>
 <ol>
@@ -773,7 +769,7 @@ var s5 = Marshal.SizeOf(st5);//32
 <li>（运行库）创建类的实例或首次访问静态成员前调用静态构造函数</li>
 <li>静态构造函数的执行优先于任何实例级别的构造函数</li>
 </ol>
-<h3 id="静态类">静态类</h3>
+<h2 id="静态类">静态类</h2>
 <p>若用<code>static</code>关键字修饰一个类，则其被声明为<strong>静态类</strong>，其将不能通过<code>new</code>关键字来创建对象实例。一般想要设计一个“工具类”时才会将一个类声明为静态类————我们使用这个类只是为了使用其中的方法/属性，而不需要创建一个具体的对象。
 .NET平台下的<code>system</code>命名空间中常用的静态类（工具类）有：</p>
 <ul>
@@ -787,15 +783,12 @@ var s5 = Marshal.SizeOf(st5);//32
 <li><code>Nullable</code> 返回值可为null的值类型</li>
 </ul>
 <p>与<code>static</code>关键字相关的还有<code>const</code>关键字和<code>readonly</code>关键字</p>
-<h2 id="keyword-const">Keyword: const</h2>
-<p>用 <code>const</code> 关键字修饰的数据为<strong>常量数据</strong>，其值在赋初值后永远不变。在类中的常量字段是<strong>隐式静态</strong>的，访问时需加上完全类名前缀。</p>
-<blockquote>
-<p>常量数据必须在编译时确定其值</p>
-</blockquote>
+<h1 id="keyword-const">Keyword: const</h1>
+<p>用 <code>const</code> 关键字修饰的数据为<strong>常量数据</strong>，其值在赋初值后永远不变。在类中的常量字段是<strong>隐式静态</strong>的，访问时需加上完全类名前缀。常量数据必须在编译时确定其值。</p>
 <p>在定义常量数据时必须对其赋初值，其他任何地方，包括构造函数，都不能对之进行写操作（构造函数在运行时才调用）。</p>
-<h2 id="keyword-readonly">Keyword: readonly</h2>
+<h1 id="keyword-readonly">Keyword: readonly</h1>
 <p>与常量数据相似的，用<code>readonly</code>关键字修饰的数据称为<strong>只读数据/字段</strong>，其在定义赋初值后同样不能被修改。但与常量数据不同，其值可在运行时确定，故其可在构造函数内赋初值（当然，其他地方依然不行）。只读字段<strong>不是</strong>隐式静态的。</p>
-<h3 id="静态只读字段">静态只读字段</h3>
+<h2 id="静态只读字段">静态只读字段</h2>
 <p>要将只读字段变为静态只需用<code>static</code>修饰，将其变为<strong>静态只读字段</strong>。静态只读字段将在类级别公开只读字段。在编译时已知静态只读字段，则其使用方式和常量字段相同；如其在运行时才能确定其值，则要用静态构造函数。</p>
 ]]></content>
     </entry>
@@ -818,27 +811,27 @@ var s5 = Marshal.SizeOf(st5);//32
         <content type="html"><![CDATA[<p>个人所用软件做个汇总下载地址，方便不时之需</p>
 <p><a href="https://github.com/iCHAIT/awesome-macOS">Mac优秀软件</a></p>
 <p><a href="https://github.com/zhaoolee/ChromeAppHeroes">Chrome实用插件</a></p>
-<h2 id="7-zip">7-Zip</h2>
+<h1 id="7-zip">7-Zip</h1>
 <p><a href="http://www.7-zip.org/download.html">官网</a>  <a href="http://sparanoid.com/lab/7z/download.html">中文主页</a></p>
-<h2 id="chrome">Chrome</h2>
+<h1 id="chrome">Chrome</h1>
 <p><a href="http://www.google.cn/chrome/browser/desktop/index.html">官网</a></p>
-<h2 id="ccleaner">CCleaner</h2>
+<h1 id="ccleaner">CCleaner</h1>
 <p><a href="http://www.piriform.com/ccleaner/download">官网</a></p>
-<h2 id="foobar2000">foobar2000</h2>
+<h1 id="foobar2000">foobar2000</h1>
 <p><a href="http://www.foobar2000.org/">官网</a>  <a href="http://blog.sina.com.cn/go2spa">汉化版</a></p>
-<h2 id="射手影音">射手影音</h2>
+<h1 id="射手影音">射手影音</h1>
 <p><a href="http://www.splayer.org/">官网</a></p>
-<h2 id="adobe-reader">Adobe Reader</h2>
+<h1 id="adobe-reader">Adobe Reader</h1>
 <p><a href="https://get.adobe.com/cn/reader/">官网</a></p>
-<h2 id="notepad">Notepad++</h2>
+<h1 id="notepad">Notepad++</h1>
 <p><a href="https://notepad-plus-plus.org/">官网</a></p>
-<h2 id="atom">Atom</h2>
+<h1 id="atom">Atom</h1>
 <p><a href="https://atom.io/">官网</a></p>
-<h2 id="cajviewer">CAJViewer</h2>
+<h1 id="cajviewer">CAJViewer</h1>
 <p><a href="http://cajviewer.cnki.net/download.html">官网</a></p>
-<h2 id="teamviewer">TeamViewer</h2>
+<h1 id="teamviewer">TeamViewer</h1>
 <p><a href="http://www.teamviewer.com">官网</a></p>
-<h2 id="splashtop">Splashtop</h2>
+<h1 id="splashtop">Splashtop</h1>
 <p><a href="http://www.splashtop.com/downloads">官网</a></p>
 ]]></content>
     </entry>
